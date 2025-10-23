@@ -1,5 +1,5 @@
 /* App.css */
-
+@import "tailwindcss";
 /* Import Tailwind layers */
 @tailwind base;
 @tailwind components;
