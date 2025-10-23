@@ -1,42 +1,65 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* App.css */
+
+/* Import Tailwind layers */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global font + background */
+body {
+  @apply bg-amber-50 text-gray-800 font-sans;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Header flame effect */
+header {
+  background: linear-gradient(90deg, #92400e, #b45309, #f59e0b);
+  color: white;
+  text-shadow: 0 0 6px rgba(255, 200, 100, 0.8);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Ember animation (for subtle background effect) */
+@keyframes emberRise {
+  0% {
+    transform: translateY(0) scale(0.8);
+    opacity: 0.8;
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(0.5);
+    opacity: 0;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.ember {
+  position: absolute;
+  bottom: 0;
+  width: 6px;
+  height: 6px;
+  background: #fbbf24;
+  border-radius: 50%;
+  animation: emberRise 4s infinite ease-in;
 }
 
-.card {
-  padding: 2em;
+/* Add variation for multiple embers */
+.ember:nth-child(2) {
+  left: 20%;
+  animation-duration: 5s;
+  background: #f59e0b;
 }
-
-.read-the-docs {
-  color: #888;
+.ember:nth-child(3) {
+  left: 40%;
+  animation-duration: 6s;
+  background: #fcd34d;
+}
+.ember:nth-child(4) {
+  left: 60%;
+  animation-duration: 7s;
+  background: #fbbf24;
+}
+.ember:nth-child(5) {
+  left: 80%;
+  animation-duration: 5.5s;
+  background: #f59e0b;
 }
