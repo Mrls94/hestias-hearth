@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import Recipes from "./pages/Recipes";
 import Shopping from "./pages/Shopping";
+import Planner from "./pages/Planner";
 import './App.css'
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
         <nav className="mt-2 flex justify-center gap-6 text-lg">
           <Link to="/" className="hover:underline">📖 Recipes</Link>
           <Link to="/shopping" className="hover:underline">🛒 Pantry</Link>
+          <Link to="/planner" className="hover:underline">📅 Planner</Link>
         </nav>
         <div className="ember"></div>
         <div className="ember"></div>
@@ -24,6 +26,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Recipes />} />
           <Route path="/shopping" element={<Shopping />} />
+          <Route path="/planner" element={<Planner />} />
         </Routes>
       </main>
     </div>
