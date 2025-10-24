@@ -1,25 +1,30 @@
 import React from "react";
 
-export default function MealSlot({ day, recipe, onAssign, recipes }) {
-  return (
-    <div className="border rounded p-3 bg-white shadow-sm flex flex-col items-center">
-      <h3 className="font-semibold text-amber-700">{day}</h3>
+export default function MealSlot({ day, mealType, recipe, onAssign, recipes }) {
+  const isFilled = Boolean(recipe);
 
-      {recipe ? (
-        <p className="mt-2 text-gray-700">{recipe}</p>
-      ) : (
-        <p className="mt-2 text-gray-400 italic">No offering yet</p>
-      )}
+  return (
+    <div className="flex flex-col">
+      <div className="flex items-center gap-2">
+        <label className="font-semibold text-sm text-gray-600">{mealType}</label>
+        <span
+          className={`transition-colors ${
+            isFilled ? "text-amber-500 animate-pulse" : "text-gray-300"
+          }`}
+        >
+          🔥
+        </span>
+      </div>
 
       <select
         onChange={(e) => {
-          if (e.target.value) onAssign(day, e.target.value);
+          if (e.target.value) onAssign(day, mealType, e.target.value);
         }}
         value={recipe || ""}
-        className="mt-3 border rounded p-2"
+        className="mt-1 border rounded p-2"
       >
         <option value="">-- Assign Offering --</option>
-        {recipes.map((r) => (
+        {(recipes || []).map((r) => (
           <option key={r.id} value={r.title}>
             {r.title}
           </option>
