@@ -8,16 +8,29 @@ export default function Recipes() {
   // Load from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem("recipes");
-    if (stored) setRecipes(JSON.parse(stored));
+    if (stored) {
+      try {
+        setRecipes(JSON.parse(stored));
+      } catch (err) {
+        console.error("Failed to parse recipes from localStorage:", err);
+        setRecipes([]);
+      }
+    }
   }, []);
+
 
   // Save to localStorage whenever recipes change
   useEffect(() => {
-    localStorage.setItem("recipes", JSON.stringify(recipes));
+    if (recipes.length > 0) {
+      localStorage.setItem("recipes", JSON.stringify(recipes));
+    }
   }, [recipes]);
 
+
   const addRecipe = (recipe) => {
-    setRecipes([recipe, ...recipes]);
+    const updated = [recipe, ...recipes];
+    setRecipes(updated);
+    localStorage.setItem("recipes", JSON.stringify(updated));
   };
 
   const deleteRecipe = (id) => {
