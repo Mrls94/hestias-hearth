@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import IngredientItem from "./IngredientItem";
+import { mergeIngredients } from "../utils";
 
 export default function ShoppingList() {
   const [ingredients, setIngredients] = useState([]);
@@ -30,30 +31,6 @@ export default function ShoppingList() {
     setIngredients([]);
   };
 
-  // Merge duplicates into { name, quantity }
-  const mergeIngredients = (list) => {
-    const counts = {};
-
-    list.forEach((item) => {
-      let key = "";
-
-      if (typeof item === "string") {
-        key = item.toLowerCase().trim();
-      } else if (item && typeof item === "object" && item.name) {
-        key = item.name.toLowerCase().trim();
-      }
-
-      if (key) {
-        counts[key] = (counts[key] || 0) + (item.quantity || 1);
-      }
-    });
-
-    return Object.entries(counts).map(([name, qty]) => ({
-      name,
-      quantity: qty,
-    }));
-  };
-
   return (
     <div className="bg-white p-4 rounded-lg shadow-md max-w-xl mx-auto">
       <h2 className="text-xl font-bold text-amber-700 mb-4">
@@ -69,7 +46,11 @@ export default function ShoppingList() {
           {ingredients.map((item, idx) => (
             <IngredientItem
               key={idx}
-              name={`${capitalize(item.name)} ×${item.quantity}`}
+              name={
+                item.name
+                  ? `${capitalize(item.name)} ×${item.quantity}`
+                  : `Unknown ×${item.quantity || 1}`
+              }
             />
           ))}
         </div>

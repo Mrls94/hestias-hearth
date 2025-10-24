@@ -1,18 +1,8 @@
 import React from "react";
+import { mergeIngredients } from "../utils";
 
 export default function RecipeCard({ recipe, onDelete }) {
   const { id, title, ingredients, steps, difficulty } = recipe;
-
-  const handleGenerateList = () => {
-    const stored = localStorage.getItem("shoppingList");
-    const existing = stored ? JSON.parse(stored) : [];
-
-    const merged = mergeIngredients([...existing, ...ingredients]);
-    localStorage.setItem("shoppingList", JSON.stringify(merged));
-
-    alert("🛒 Ingredients sent to Hestia’s Pantry!");
-  };
-
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-amber-500">
@@ -37,11 +27,32 @@ export default function RecipeCard({ recipe, onDelete }) {
 
       <div className="flex gap-3 mt-4">
         <button
-          onClick={handleGenerateList}
-          className="bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600"
+          onClick={() => {
+            // Load existing list (if any)
+            const stored = localStorage.getItem("shoppingList");
+            const existing = stored ? JSON.parse(stored) : [];
+
+            // Normalize into { name, quantity }
+            const normalize = (list) =>
+              list.map((item) =>
+                typeof item === "string"
+                  ? { name: item.trim(), quantity: 1 }
+                  : { name: item.name.trim(), quantity: item.quantity || 1 }
+              );
+
+            const merged = mergeIngredients([
+              ...normalize(existing),
+              ...normalize(recipe.ingredients),
+            ]);
+
+            localStorage.setItem("shoppingList", JSON.stringify(merged));
+            alert("🛒 Ingredients merged into Hestia’s Pantry!");
+          }}
+          className="mt-2 bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600"
         >
-          🛒 Generate Shopping List
+          Generate Shopping List
         </button>
+
 
         <button
           onClick={() => onDelete(id)}
