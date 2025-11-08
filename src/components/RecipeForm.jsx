@@ -31,7 +31,7 @@ export default function RecipeForm({ onAdd }) {
       className="bg-white p-4 rounded-lg shadow-md mb-6 border-l-4 border-amber-400"
     >
       <h2 className="text-lg font-bold text-amber-700 mb-4">
-        🔥 Add a New Offering
+        🔥 Add a New Offering!
       </h2>
 
       <input
