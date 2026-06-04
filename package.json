@@ -6,17 +6,25 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "rebuild-deps": "npm ci && npm rebuild",
+    "start:dev": "vite --port 5173",
+    "check:css-imports": "node ./scripts/check-css-imports.cjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.15",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.4"
+    "@uiw/react-md-editor": "^4.0.8",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.9.4",
+    "react-simplemde-editor": "^5.2.0",
+    "simplemde": "^1.11.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^24.6.0",
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.21",

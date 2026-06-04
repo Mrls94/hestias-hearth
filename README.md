@@ -46,7 +46,22 @@ npm install
 npm run dev
 ```
 
-### 4. Build for production
+If you need a fixed port (5173) use:
+```bash
+npm run start:dev
+```
+
+### 4. Rebuild dependencies (if native modules or node_modules are corrupted)
+```bash
+npm run rebuild-deps
+```
+
+### 5. Check for deprecated CSS imports (helpful for third-party CSS path changes)
+```bash
+npm run check:css-imports
+```
+
+### 6. Build for production
 ```bash
 npm run build
 ```

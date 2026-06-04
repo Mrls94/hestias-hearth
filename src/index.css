@@ -1,7 +1,29 @@
 /* index.css */
 /* Optional: global font (example with Google Fonts) */
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+:root {
+  --cream: #F7F3ED;
+  --warm-white: #FDFAF6;
+  --terracotta: #C4603A;
+  --terracotta-light: #F0C4B0;
+  --terracotta-dark: #8B3D20;
+  --sage: #6B8F6E;
+  --sage-light: #C8DACC;
+  --sage-dark: #3D5C40;
+  --ochre: #C9893A;
+  --ochre-light: #F0D4A8;
+  --charcoal: #2C2824;
+  --stone: #8A8278;
+  --stone-light: #D4CFC8;
+  --ink: #1A1714;
+  --surface: #FFFFFF;
+  --nav-h: 64px;
+  --bottom-h: 72px;
+  --accent: var(--terracotta);
+}
+
 /* Tailwind base styles */
 @tailwind base;
 @tailwind components;
@@ -14,6 +36,9 @@ html, body, #root {
   padding: 0;
 }
 
+/* Smooth in-page navigation for CTA */
+html { scroll-behavior: smooth; }
+
 /* Apply global font families */
 body {
   font-family: 'Inter', sans-serif;
@@ -24,4 +49,29 @@ body {
 /* Headings get a mythological serif vibe */
 h1, h2, h3, h4 {
   font-family: 'Merriweather', serif;
+}
+
+/* Accessibility helpers */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.skip-link:focus {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--terracotta); /* accent color */
+  color: white;
+  border-radius: 4px;
+  z-index: 1000;
 }

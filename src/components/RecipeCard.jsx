@@ -1,20 +1,22 @@
 import React from "react";
 import { mergeIngredients } from "../utils";
+import Markdown from "react-markdown";
 
 export default function RecipeCard({ recipe, onDelete }) {
   const { id, title, ingredients, steps, difficulty } = recipe;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-amber-500">
-      <h3 className="text-xl font-bold text-amber-700 mb-2">{title}</h3>
+    <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-left-terra">
+      <h3 className="text-xl font-bold mb-2 title-terra">{title}</h3>
 
       <p className="text-sm text-gray-600 mb-1">
         <span className="font-semibold">Difficulty:</span> {difficulty}
       </p>
 
-      <p className="text-sm text-gray-700 mb-2">
-        <span className="font-semibold">Steps:</span> {steps}
-      </p>
+      <h3 className="font-semibold mt-4">📜 Steps</h3>
+      <div className="prose prose-sm text-gray-800">
+        <Markdown>{recipe.steps}</Markdown>
+      </div>
 
       <div className="mb-2">
         <span className="font-semibold text-sm text-gray-600">Ingredients:</span>
@@ -48,7 +50,7 @@ export default function RecipeCard({ recipe, onDelete }) {
             localStorage.setItem("shoppingList", JSON.stringify(merged));
             alert("🛒 Ingredients merged into Hestia’s Pantry!");
           }}
-          className="mt-2 bg-amber-500 text-white px-3 py-1 rounded hover:bg-amber-600"
+          className="mt-2 text-white px-3 py-1 rounded btn-terra-sm"
         >
           Generate Shopping List
         </button>

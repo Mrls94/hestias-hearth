@@ -6,9 +6,26 @@
 @tailwind utilities;
 
 /* Global font + background */
-body {
-  @apply bg-amber-50 text-gray-800 font-sans;
-}
+body { background: var(--cream); color: var(--charcoal); font-family: 'DM Sans', sans-serif; font-size:14px; line-height:1.45; }
+
+/* Typography tuning based on design.html */
+.hero-greeting { font-family: 'DM Sans', sans-serif; font-size:13px; color: rgba(255,255,255,0.75); font-weight:300; text-transform:uppercase; letter-spacing:1.2px; margin-bottom:4px; }
+.hero-title { font-family: 'Lora', serif; font-size:26px; color: var(--surface); font-weight:600; line-height:1.2; margin-bottom:16px; }
+.hero-subtext { font-size:13px; color: rgba(255,255,255,0.85); }
+.hero-stat-num { font-family: 'Lora', serif; font-size:22px; font-weight:600; line-height:1; }
+
+.section-title { font-family: 'Lora', serif; font-size:18px; font-weight:600; color: var(--charcoal); }
+.qa-label { font-size:13px; font-weight:500; color: var(--charcoal); line-height:1.3; }
+.recipe-name { font-size:13px; font-weight:500; color: var(--charcoal); margin-bottom:4px; line-height:1.3; }
+.recipe-meta { font-size:11px; color: var(--stone); }
+.meal-name { font-size:14px; font-weight:500; color: var(--charcoal); }
+.meal-thumb { width:44px; height:44px; border-radius:10px; }
+
+.btn-terra, .btn-terra-sm, .btn-terra-md { font-size:14px; font-weight:600; }
+.btn-terra:hover, .btn-terra-sm:hover { background: var(--terracotta-dark); }
+
+/* Ensure headings use serif where appropriate */
+h1, h2, h3 { font-family: 'Lora', serif; }
 
 /* Header flame effect */
 header {
@@ -63,3 +80,122 @@ header {
   animation-duration: 5.5s;
   background: #f59e0b;
 }
+
+/* Hero band extras */
+.hero-band .hero-stats > div { min-width: 80px; }
+
+.recipe-grid-card { transition: transform .12s ease, box-shadow .12s ease; }
+.recipe-grid-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+
+/* Top nav styles (from design) */
+.top-nav { position: sticky; top: 0; z-index: 50; }
+.nav-logo .logo-flame { width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 40% 30%, #fff, #fef3c7 10%, #f59e0b 40%, #b45309 70%); box-shadow: 0 3px 8px rgba(180,80,10,0.3); }
+.nav-actions .icon-btn { background: transparent; border: none; padding: 6px; border-radius: 6px; cursor: pointer; color: #374151; }
+.icon-btn:hover { background: rgba(15,23,42,0.03); }
+.avatar { font-size: 12px; font-weight: 600; }
+
+/* Top nav link styles */
+.main-links a { padding: 6px 8px; border-radius: 6px; }
+.main-links a:hover { background: rgba(245,158,11,0.08); }
+
+/* Planner styles inspired by design */
+.week-strip { background: transparent; }
+.week-label { font-weight: 600; }
+.days-row { display: flex; gap: 8px; }
+.day-pill { background: white; border-radius: 10px; padding: 8px 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display:flex; flex-direction:column; align-items:center; width:48px; }
+.day-pill.active { background: linear-gradient(180deg,#fef3c7,#fde68a); }
+.day-letter { font-weight:700; }
+.day-num { font-size:12px; color:#6b7280; }
+
+.planner-day { margin-top: 12px; }
+.planner-meal-slot .slot-header { font-weight:600; }
+.slot-recipe { display:flex; gap:12px; align-items:center; }
+.slot-thumb { width:48px; height:48px; border-radius:8px; background:#fff7ed; display:flex; align-items:center; justify-content:center; font-size:24px; }
+.slot-details .slot-name { font-weight:600; }
+.slot-empty { background:#fffaf0; border:1px dashed #f3e8c9; text-align:center; padding:16px; border-radius:8px; }
+
+/* Shopping styles */
+.shopping-header-card { border: 1px solid rgba(0,0,0,0.04); }
+.shopping-progress { height:6px; border-radius:6px; overflow:hidden; }
+.shopping-progress-fill { height:100%; }
+.pantry-toggle-row { border-bottom:1px solid rgba(0,0,0,0.03); padding-bottom:12px; margin-bottom:12px; }
+.toggle-switch { cursor:pointer; }
+.shopping-item { display:flex; align-items:center; gap:8px; padding:8px; border-radius:6px; }
+.shopping-item .check-circle { width:20px; height:20px; border-radius:50%; border:1px solid #d1d5db; display:inline-flex; align-items:center; justify-content:center; }
+.shopping-item .check-circle.checked { background: var(--terracotta); color: white; border-color: var(--terracotta); }
+
+/* Mobile bottom nav */
+.mobile-bottom-nav { border-top:1px solid var(--stone-light); }
+.mobile-bottom-nav .nav-item { display:flex; flex-direction:column; align-items:center; font-size:12px; padding:6px 8px; color: var(--stone); gap:4px; min-width:44px; }
+.mobile-bottom-nav .nav-item.active { color: var(--terracotta); background: var(--warm-white); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.mobile-bottom-nav .nav-item div { line-height:1; }
+
+
+/* Hero band extras */
+.hero-band { background: var(--terracotta); padding: 24px; position: relative; overflow: hidden; color: white; border-radius: 16px; }
+.hero-band::before { content: ''; position: absolute; right: -30px; top: -30px; width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.08); }
+.hero-band::after { content: ''; position: absolute; right: 30px; bottom: -50px; width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.06); }
+.hero-band .hero-stats > div { min-width: 80px; }
+
+
+/* Quick actions */
+.quick-actions { background: transparent; }
+.qa-card { border:1px solid var(--stone-light); border-radius:16px; padding:12px; display:flex; align-items:center; gap:12px; transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; background: var(--surface); }
+.qa-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.06); }
+.qa-icon { width:44px; height:44px; display:flex; align-items:center; justify-content:center; border-radius:12px; font-size:18px; flex-shrink:0; }
+.qa-icon-terra { background: var(--terracotta-light); color: var(--terracotta-dark); }
+.qa-label { font-weight:500; font-size:13px; color: var(--charcoal); }
+
+/* Today's meals */
+.today-card { overflow:hidden; }
+.today-meal { display:flex; align-items:center; gap:12px; }
+.today-meal + .today-meal { border-top: 1px solid rgba(0,0,0,0.04); }
+.meal-thumb { width:48px; height:48px; border-radius:8px; background:#fff7ed; display:flex; align-items:center; justify-content:center; }
+.meal-pill { display:inline-block; margin-right:6px; }
+
+/* Utility classes added to replace inline styles */
+.app-root { background: var(--cream); }
+.nav-link { color: var(--charcoal); padding: 6px 8px; border-radius: 6px; transition: color .12s ease, background .12s ease; text-decoration: none; }
+.nav-link:hover { color: var(--terracotta-dark); background: rgba(196,96,58,0.05); }
+.nav-link.active { color: var(--terracotta); font-weight: 600; background: rgba(196,96,58,0.08); }
+.avatar-terra { background: var(--terracotta); color: white; }
+.nav-home { color: var(--terracotta); }
+
+/* Accent borders and headings */
+.accent-left { border-left-color: var(--terracotta-light) !important; }
+.panel-accent-left { border-left-color: var(--terracotta-light) !important; }
+.accent-heading { color: var(--terracotta-dark) !important; }
+.label-accent { color: var(--terracotta-dark); }
+
+/* Buttons */
+.btn-terra { background: var(--terracotta); color: white; }
+.btn-terra:hover { background: var(--terracotta-dark); }
+.btn-terra-sm { background: var(--terracotta); color: white; padding: 6px 10px; }
+.btn-terra-sm:hover { background: var(--terracotta-dark); }
+
+/* Progress / pantry */
+.progress-fill-terra { background: var(--terracotta); }
+.pantry-badge-accent { background: var(--terracotta-light); color: var(--terracotta-dark); padding: 4px 8px; border-radius: 6px; margin-left: 8px; font-size: 0.75rem; }
+
+/* Recipe card accents */
+.border-left-terra { border-left-color: var(--terracotta) !important; }
+.title-terra { color: var(--terracotta-dark) !important; }
+.btn-terra-sm { background: var(--terracotta); color: white; }
+.qa-icon-terra { background: var(--terracotta-light); color: var(--terracotta-dark); }
+.link-terra { color: var(--terracotta); font-weight: 500; }
+.meal-thumb-cream { background: var(--cream); }
+.meal-pill-ochre { background: var(--ochre-light); color: var(--charcoal); width: 70px; display: inline-block; text-align: center; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.6px; }
+.difficulty-terra { color: var(--terracotta-dark); }
+
+/* Hero decorations */
+.hero-circle { background: var(--terracotta-light); opacity: 0.6; }
+.hero-subtext { color: var(--terracotta-dark); }
+
+/* Daily total / planner */
+.daily-total-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--stone); margin-bottom: 4px; }
+.daily-total-value { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: var(--ink); }
+.daily-total-unit { font-size: 14px; font-weight: 400; color: var(--stone); }
+.daily-total-right { text-align: right; }
+.daily-total-target { font-size: 12px; color: var(--stone); margin-bottom: 4px; }
+.daily-total-target-value { font-size: 16px; font-weight: 500; color: #85a86a; }
+.daily-total-remaining { font-size: 11px; color: var(--stone); }

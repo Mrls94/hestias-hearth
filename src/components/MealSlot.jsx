@@ -9,7 +9,7 @@ export default function MealSlot({ day, mealType, recipe, onAssign, recipes }) {
         <label className="font-semibold text-sm text-gray-600">{mealType}</label>
         <span
           className={`transition-colors ${
-            isFilled ? "text-amber-500 animate-pulse" : "text-gray-300"
+            isFilled ? "text-[var(--terracotta)] animate-pulse" : "text-gray-300"
           }`}
         >
           🔥

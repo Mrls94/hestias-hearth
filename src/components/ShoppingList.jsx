@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import IngredientItem from "./IngredientItem";
 import { mergeIngredients } from "../utils";
 
-export default function ShoppingList() {
+export default function ShoppingList({onChange}) {
   const [ingredients, setIngredients] = useState([]);
 
   // Load shopping list from localStorage on mount
@@ -11,7 +11,9 @@ export default function ShoppingList() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        setIngredients(mergeIngredients(parsed));
+        // ensure checked flag is present
+        const merged = mergeIngredients(parsed).map((it) => ({...it, checked: it.checked || false}));
+        setIngredients(merged);
       } catch (err) {
         console.error("Failed to parse shopping list:", err);
         setIngredients([]);
@@ -23,17 +25,24 @@ export default function ShoppingList() {
   useEffect(() => {
     if (ingredients.length > 0) {
       localStorage.setItem("shoppingList", JSON.stringify(ingredients));
+    } else {
+      localStorage.removeItem("shoppingList");
     }
-  }, [ingredients]);
+    if (typeof onChange === 'function') onChange(ingredients);
+  }, [ingredients, onChange]);
 
   const clearList = () => {
     localStorage.removeItem("shoppingList");
     setIngredients([]);
   };
 
+  const toggleItem = (item) => {
+    setIngredients((prev) => prev.map((it) => it.name === item.name ? {...it, checked: !it.checked} : it));
+  };
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-md max-w-xl mx-auto">
-      <h2 className="text-xl font-bold text-amber-700 mb-4">
+      <h2 className="text-xl font-bold mb-4 title-terra">
         🛒 Offerings to the Hearth
       </h2>
 
@@ -46,11 +55,8 @@ export default function ShoppingList() {
           {ingredients.map((item, idx) => (
             <IngredientItem
               key={idx}
-              name={
-                item.name
-                  ? `${capitalize(item.name)} ×${item.quantity}`
-                  : `Unknown ×${item.quantity || 1}`
-              }
+              item={item}
+              onToggle={toggleItem}
             />
           ))}
         </div>
