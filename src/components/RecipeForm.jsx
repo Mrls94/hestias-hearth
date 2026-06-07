@@ -1,21 +1,17 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import SimpleMDE from "react-simplemde-editor";
 import "simplemde/dist/simplemde.min.css";
 import ReactMarkdown from "react-markdown";
+import { useAppState } from "../context/AppState";
 
 export default function RecipeForm({ onAdd }) {
+  const { pantry } = useAppState();
   const [title, setTitle] = useState("");
   const [steps, setSteps] = useState("");
   const [difficulty, setDifficulty] = useState("Mortal");
 
-  // master ingredients list
-  const [masterIngredients, setMasterIngredients] = useState(() => {
-    const stored = localStorage.getItem("ingredients");
-    if (stored) {
-      try { return JSON.parse(stored); } catch { return []; }
-    }
-    return [];
-  });
+  // derive ingredient name list from pantry
+  const masterIngredients = pantry.map(i => i.name);
 
   // selected ingredients for this recipe
   const [selectedIngredients, setSelectedIngredients] = useState([]);
@@ -40,27 +36,21 @@ export default function RecipeForm({ onAdd }) {
     ],
   }), []);
 
-  // keep master list persisted
-  useEffect(() => {
-    localStorage.setItem("ingredients", JSON.stringify(masterIngredients));
-  }, [masterIngredients]);
-
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || !ingredients || !steps) return;
+    if (!title || selectedIngredients.length === 0 || !steps) return;
 
     const newRecipe = {
       id: Date.now(),
       title,
-      ingredients: ingredients.split(",").map((i) => i.trim()),
+      ingredients: selectedIngredients,
       steps,
       difficulty,
     };
 
     onAdd(newRecipe);
     setTitle("");
-    setIngredients("");
+    setSelectedIngredients([]);
     setSteps("");
     setDifficulty("Mortal");
   };
@@ -87,7 +77,7 @@ export default function RecipeForm({ onAdd }) {
       <div className="mb-3">
         <label className="block font-semibold mb-2 label-accent">🥕 Ingredients</label>
         {masterIngredients.length === 0 && (
-          <p className="text-gray-500 mb-2">No ingredients defined. Add some in the Ingredients tab.</p>
+          <p className="text-gray-500 mb-2">No ingredients defined. Add some in the Pantry.</p>
         )}
 
         <select
