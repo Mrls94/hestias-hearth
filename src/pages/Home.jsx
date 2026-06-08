@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppState } from '../context/AppState';
+import { useAppState, expiryStatus, expiryLabel } from '../context/AppState';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner'];
 const MEAL_PILL = { Breakfast: 'meal-pill-breakfast', Lunch: 'meal-pill-lunch', Dinner: 'meal-pill-dinner' };
@@ -39,7 +39,8 @@ function weekPlanned(mealPlanner) {
 }
 
 export default function Home() {
-  const { recipes, mealPlanner } = useAppState();
+  const { recipes, mealPlanner, pantry } = useAppState();
+  const expiring = pantry.filter(i => ['soon', 'exp'].includes(expiryStatus(i.expiry))).slice(0, 3);
   const navigate = useNavigate();
   const key = todayKey();
   const todayMeals = mealPlanner[key] || {};
@@ -176,6 +177,28 @@ export default function Home() {
             </div>
             <button className="wc-btn">Start session</button>
           </div>
+
+          {expiring.length > 0 && (
+            <>
+              <div className="section-head">
+                <span className="section-title">Use it soon</span>
+                <button className="section-link" onClick={() => navigate('/pantry')}>Pantry →</button>
+              </div>
+              <div className="card">
+                {expiring.map((item, i) => (
+                  <div
+                    key={item.name}
+                    className="alert-row"
+                    style={i === expiring.length - 1 ? { borderBottom: 'none' } : {}}
+                  >
+                    <div className="alert-icon">{item.emoji || '📦'}</div>
+                    <span className="alert-name">{item.name}</span>
+                    <span className={`expiry-badge ${expiryStatus(item.expiry)}`}>{expiryLabel(item.expiry)}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
       </div>

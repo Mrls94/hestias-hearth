@@ -2,6 +2,8 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
+import BottomNav from './components/BottomNav';
+import FloatingActionButton from './components/FloatingActionButton';
 import Home from './pages/Home';
 import Recipes from './pages/Recipes';
 import Shopping from './pages/Shopping';
@@ -25,6 +27,8 @@ export default function App() {
           </Routes>
         </div>
       </div>
+      <BottomNav />
+      <FloatingActionButton />
     </div>
   );
 }

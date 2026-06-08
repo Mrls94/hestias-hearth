@@ -9,6 +9,7 @@ const CHIPS = [
   { label: 'Dinner',            value: 'Dinner' },
   { label: 'Vegetarian',        value: 'Vegetarian' },
   { label: 'Quick · under 30',  value: 'Quick' },
+  { label: 'High protein',      value: 'HighProtein' },
 ];
 
 const SAMPLES = [
@@ -24,9 +25,11 @@ export default function Recipes() {
 
   const filtered = activeChip === 'Quick'
     ? recipes.filter(r => (r.time || 999) < 30)
-    : activeChip
-      ? recipes.filter(r => r.category === activeChip || r.difficulty === activeChip)
-      : recipes;
+    : activeChip === 'HighProtein'
+      ? recipes.filter(r => (r.kcal || 0) > 500)
+      : activeChip
+        ? recipes.filter(r => r.category === activeChip || r.difficulty === activeChip)
+        : recipes;
 
   const importSamples = () => {
     const base = Date.now();

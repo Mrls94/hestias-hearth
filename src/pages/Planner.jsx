@@ -36,6 +36,7 @@ export default function Planner() {
   const navigate = useNavigate();
   const [offset, setOffset]       = useState(0);
   const [assigning, setAssigning] = useState(null); // { key, meal }
+  const [activeDay, setActiveDay] = useState(() => (new Date().getDay() + 6) % 7);
 
   const dates = getWeekDates(offset);
   const getRecipe = id => id ? recipes.find(r => r.id === id || r.id === Number(id)) : null;
@@ -54,9 +55,16 @@ export default function Planner() {
     return total || null;
   };
 
+  // Mobile selected day
+  const activeDateKey = toKey(dates[activeDay]);
+  const activeDayPlan = mealPlanner[activeDateKey] || {};
+  const activeDayKcal = MEAL_TYPES
+    .map(t => getRecipe(activeDayPlan[t])?.kcal || 0)
+    .reduce((a, b) => a + b, 0);
+
   return (
     <>
-      {/* ── Week bar ── */}
+      {/* ── Week bar (shared desktop + mobile) ── */}
       <div className="week-bar">
         <div className="week-range">
           <div className="week-nav">
@@ -78,91 +86,177 @@ export default function Planner() {
         </div>
       </div>
 
-      {/* ── Planner grid ── */}
-      <div className="planner-grid">
-        {/* Corner */}
-        <div className="pg-corner" />
+      {/* ── Desktop: 7-column grid + footer ── */}
+      <div className="planner-grid-wrap">
+        <div className="planner-grid">
+          <div className="pg-corner" />
 
-        {/* Day headers */}
-        {dates.map((d, i) => (
-          <div key={i} className={`pg-dayhead${isToday(d) ? ' today' : ''}`}>
-            <div className="pg-day-letter">{DAY_INITIALS[i]}</div>
-            <div className="pg-day-num">{d.getDate()}</div>
-          </div>
-        ))}
-
-        {/* Meal rows */}
-        {MEAL_TYPES.map(meal => (
-          <React.Fragment key={meal}>
-            <div className="pg-rowlabel">
-              <span className="ic">{MEAL_ICONS[meal]}</span>
-              <span className="tx">{meal}</span>
+          {dates.map((d, i) => (
+            <div key={i} className={`pg-dayhead${isToday(d) ? ' today' : ''}`}>
+              <div className="pg-day-letter">{DAY_INITIALS[i]}</div>
+              <div className="pg-day-num">{d.getDate()}</div>
             </div>
-            {dates.map((d, i) => {
-              const key    = toKey(d);
-              const recipeId = (mealPlanner[key] || {})[meal];
-              const recipe   = getRecipe(recipeId);
-              const editing  = assigning?.key === key && assigning?.meal === meal;
+          ))}
 
-              return (
-                <div key={i} className={`pg-cell${isToday(d) ? ' today-col' : ''}`}>
-                  {recipe ? (
-                    <div className="pg-meal" title={recipe.title}>
-                      <span className="pg-meal-emoji">{recipe.emoji || '🍽️'}</span>
-                      <span className="pg-meal-name">{recipe.title}</span>
-                      {recipe.kcal && <span className="pg-meal-kcal">{recipe.kcal} kcal</span>}
+          {MEAL_TYPES.map(meal => (
+            <React.Fragment key={meal}>
+              <div className="pg-rowlabel">
+                <span className="ic">{MEAL_ICONS[meal]}</span>
+                <span className="tx">{meal}</span>
+              </div>
+              {dates.map((d, i) => {
+                const key      = toKey(d);
+                const recipeId = (mealPlanner[key] || {})[meal];
+                const recipe   = getRecipe(recipeId);
+                const editing  = assigning?.key === key && assigning?.meal === meal;
+                return (
+                  <div key={i} className={`pg-cell${isToday(d) ? ' today-col' : ''}`}>
+                    {recipe ? (
+                      <div className="pg-meal" title={recipe.title}>
+                        <span className="pg-meal-emoji">{recipe.emoji || '🍽️'}</span>
+                        <span className="pg-meal-name">{recipe.title}</span>
+                        {recipe.kcal && <span className="pg-meal-kcal">{recipe.kcal} kcal</span>}
+                        <button
+                          className="pg-meal-clear"
+                          onClick={() => clearMeal(key, meal)}
+                          aria-label="Remove meal"
+                        >×</button>
+                      </div>
+                    ) : editing ? (
+                      <select
+                        autoFocus
+                        className="pg-select"
+                        defaultValue=""
+                        onChange={e => handleSelect(key, meal, e.target.value)}
+                        onBlur={() => setAssigning(null)}
+                      >
+                        <option value="">— pick a recipe —</option>
+                        {recipes.map(r => (
+                          <option key={r.id} value={r.id}>{r.title}</option>
+                        ))}
+                      </select>
+                    ) : (
                       <button
-                        className="pg-meal-clear"
-                        onClick={() => clearMeal(key, meal)}
-                        aria-label="Remove meal"
-                      >×</button>
-                    </div>
-                  ) : editing ? (
-                    <select
-                      autoFocus
-                      className="pg-select"
-                      defaultValue=""
-                      onChange={e => handleSelect(key, meal, e.target.value)}
-                      onBlur={() => setAssigning(null)}
-                    >
-                      <option value="">— pick a recipe —</option>
-                      {recipes.map(r => (
-                        <option key={r.id} value={r.id}>{r.title}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <button
-                      className="pg-add"
-                      onClick={() => {
-                        if (recipes.length === 0) { navigate('/recipes'); return; }
-                        setAssigning({ key, meal });
-                      }}
-                      aria-label={`Add ${meal} on ${d.toLocaleDateString()}`}
-                    >
-                      +
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </React.Fragment>
-        ))}
+                        className="pg-add"
+                        onClick={() => {
+                          if (recipes.length === 0) { navigate('/recipes'); return; }
+                          setAssigning({ key, meal });
+                        }}
+                        aria-label={`Add ${meal} on ${d.toLocaleDateString()}`}
+                      >+</button>
+                    )}
+                  </div>
+                );
+              })}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div className="planner-foot">
+          <div className="pf-label">Daily kcal</div>
+          {dates.map((d, i) => {
+            const key  = toKey(d);
+            const kcal = dailyKcal(key);
+            return (
+              <div key={i} className={`pf-cell${isToday(d) ? ' today-col' : ''}${kcal ? ' under' : ''}`}>
+                <span className="pf-num" style={kcal ? {} : { color: 'var(--stone-light)' }}>
+                  {kcal ? kcal.toLocaleString() : '—'}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* ── Daily kcal footer ── */}
-      <div className="planner-foot">
-        <div className="pf-label">Daily kcal</div>
-        {dates.map((d, i) => {
-          const key  = toKey(d);
-          const kcal = dailyKcal(key);
+      {/* ── Mobile: day-strip view ── */}
+      <div className="planner-mobile">
+        {/* Day strip */}
+        <div className="daystrip">
+          {dates.map((d, i) => (
+            <button
+              key={i}
+              className={`daychip${i === activeDay ? ' active' : ''}`}
+              onClick={() => setActiveDay(i)}
+            >
+              <div className="dc-letter">{DAY_INITIALS[i]}</div>
+              <div className="dc-num">{d.getDate()}</div>
+            </button>
+          ))}
+        </div>
+
+        {/* Daily total banner */}
+        <div className="day-total-banner">
+          <span className="dt-label">Daily total</span>
+          <span className="dt-num">{activeDayKcal > 0 ? `${activeDayKcal.toLocaleString()} kcal` : '—'}</span>
+        </div>
+
+        {/* Meal blocks */}
+        {MEAL_TYPES.map(mealType => {
+          const recipe  = getRecipe(activeDayPlan[mealType]);
+          const editing = assigning?.key === activeDateKey && assigning?.meal === mealType;
           return (
-            <div key={i} className={`pf-cell${isToday(d) ? ' today-col' : ''}${kcal ? ' under' : ''}`}>
-              <span className="pf-num" style={kcal ? {} : { color: 'var(--stone-light)' }}>
-                {kcal ? kcal.toLocaleString() : '—'}
-              </span>
+            <div key={mealType} className="plan-block">
+              <div className="plan-block-head">
+                <span className="pb-icon">{MEAL_ICONS[mealType]}</span>
+                <span className="pb-label">{mealType}</span>
+              </div>
+              {recipe ? (
+                <div className="plan-meal-card">
+                  <div className="pm-emoji">{recipe.emoji || '🍽️'}</div>
+                  <div className="pm-info">
+                    <div className="pm-name">{recipe.title}</div>
+                    {recipe.kcal && <div className="pm-kcal">{recipe.kcal} kcal</div>}
+                  </div>
+                  <button className="pm-clear" onClick={() => clearMeal(activeDateKey, mealType)}>×</button>
+                </div>
+              ) : editing ? (
+                <select
+                  autoFocus
+                  className="pg-select"
+                  defaultValue=""
+                  onChange={e => handleSelect(activeDateKey, mealType, e.target.value)}
+                  onBlur={() => setAssigning(null)}
+                >
+                  <option value="">— pick a recipe —</option>
+                  {recipes.map(r => <option key={r.id} value={r.id}>{r.emoji} {r.title}</option>)}
+                </select>
+              ) : (
+                <button
+                  className="plan-add-btn"
+                  onClick={() => {
+                    if (recipes.length === 0) { navigate('/recipes'); return; }
+                    setAssigning({ key: activeDateKey, meal: mealType });
+                  }}
+                >
+                  + Add {mealType.toLowerCase()}
+                </button>
+              )}
             </div>
           );
         })}
+
+        {/* Workout block — static placeholder */}
+        <div className="plan-block">
+          <div className="plan-block-head">
+            <span className="pb-icon">💪</span>
+            <span className="pb-label">Workout</span>
+          </div>
+          <div className="workout-card" style={{ marginTop: 0 }}>
+            <div className="wc-head">
+              <div>
+                <div className="wc-label">Scheduled · 6:00 PM</div>
+                <div className="wc-title">Upper body strength</div>
+              </div>
+              <div className="wc-icon">💪</div>
+            </div>
+            <div className="wc-meta">
+              <span>⏱ 45 min</span>
+              <span>💪 Intermediate</span>
+              <span>🔥 ~320 kcal</span>
+            </div>
+            <button className="wc-btn">Start session</button>
+          </div>
+        </div>
       </div>
     </>
   );
