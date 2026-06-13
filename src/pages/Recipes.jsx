@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import RecipeForm from '../components/RecipeForm';
+import React, { useState, useEffect } from 'react';
+import RecipeCreator from '../components/RecipeCreator';
 import { useAppState } from '../context/AppState';
 
 const CHIPS = [
@@ -22,6 +22,13 @@ const SAMPLES = [
 export default function Recipes() {
   const { recipes, addRecipe, deleteRecipe, updateRecipe } = useAppState();
   const [activeChip, setActiveChip] = useState(null);
+  const [showCreator, setShowCreator] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setShowCreator(true);
+    window.addEventListener('open-recipe-creator', handler);
+    return () => window.removeEventListener('open-recipe-creator', handler);
+  }, []);
 
   const filtered = activeChip === 'Quick'
     ? recipes.filter(r => (r.time || 999) < 30)
@@ -36,7 +43,9 @@ export default function Recipes() {
     SAMPLES.forEach((s, i) => addRecipe({ ...s, id: base + i }));
   };
 
-  const scrollToForm = () => document.getElementById('new-recipe-form')?.scrollIntoView({ behavior: 'smooth' });
+  if (showCreator) {
+    return <RecipeCreator onClose={() => setShowCreator(false)} />;
+  }
 
   return (
     <>
@@ -53,7 +62,7 @@ export default function Recipes() {
             </button>
           ))}
         </div>
-        <button className="btn-primary" onClick={scrollToForm}>
+        <button className="btn-primary" onClick={() => setShowCreator(true)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
@@ -69,7 +78,7 @@ export default function Recipes() {
         <div style={{ color: 'var(--stone)', padding: '48px 0', textAlign: 'center' }}>
           {activeChip
             ? `No ${activeChip} recipes yet. Try a different filter or add one below.`
-            : 'No recipes yet — add one below or import samples.'}
+            : 'No recipes yet — add one or import samples.'}
         </div>
       ) : (
         <div className="recipe-grid">
@@ -104,14 +113,6 @@ export default function Recipes() {
           ))}
         </div>
       )}
-
-      {/* ── Add form ── */}
-      <div style={{ marginTop: 52 }}>
-        <div className="section-head">
-          <span className="section-title">Add a new recipe</span>
-        </div>
-        <RecipeForm onAdd={addRecipe} />
-      </div>
     </>
   );
 }

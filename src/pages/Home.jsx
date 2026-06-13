@@ -59,7 +59,7 @@ export default function Home() {
         <div className="hero-left">
           <div className="hero-greeting">{dateLabel} · {getGreeting()}</div>
           <h1 className="hero-title">Welcome back, <em>friend</em>!</h1>
-          <p className="hero-sub">Simple recipe manager for wedding cooking — add recipes, generate shopping lists, and plan meals.</p>
+          <p className="hero-sub">Simple recipe manager — add recipes, generate shopping lists, and plan meals.</p>
         </div>
         <div className="hero-stats">
           <div className="hero-stat">

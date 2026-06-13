@@ -1,17 +1,18 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-const SCROLL_TARGETS = {
-  '/recipes': () => document.getElementById('new-recipe-form'),
-  '/pantry':  () => document.querySelector('.pantry-add-form'),
-};
+const ROUTES = ['/recipes', '/pantry'];
 
 export default function FloatingActionButton() {
   const { pathname } = useLocation();
-  if (!SCROLL_TARGETS[pathname]) return null;
+  if (!ROUTES.includes(pathname)) return null;
 
   const handleClick = () => {
-    SCROLL_TARGETS[pathname]()?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (pathname === '/recipes') {
+      window.dispatchEvent(new Event('open-recipe-creator'));
+    } else {
+      document.querySelector('.pantry-add-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
