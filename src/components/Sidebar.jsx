@@ -69,13 +69,16 @@ function NavItem({ to, icon, label, count, end }) {
 }
 
 export default function Sidebar() {
-  const { mealPlanner, recipes, shoppingList, householdInfo, switchHousehold } = useAppState();
+  const { mealPlanner, recipes, shoppingList, householdInfo, switchHousehold, renameHousehold } = useAppState();
   const { userName, userEmail, signOut } = useAuth();
   const navigate = useNavigate();
   const planned = countPlannedMeals(mealPlanner);
   const shoppingCount = shoppingList.filter(i => !i.checked).length;
-  const [copied, setCopied]       = React.useState(false);
-  const [joining, setJoining]     = React.useState(false);
+  const [copied, setCopied]         = React.useState(false);
+  const [editingName, setEditingName] = React.useState(false);
+  const [nameInput, setNameInput]   = React.useState('');
+  const [nameBusy, setNameBusy]     = React.useState(false);
+  const [joining, setJoining]       = React.useState(false);
   const [joinCode, setJoinCode]   = React.useState('');
   const [joinErr, setJoinErr]     = React.useState('');
   const [joinBusy, setJoinBusy]   = React.useState(false);
@@ -86,6 +89,20 @@ export default function Sidebar() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleRename = async (e) => {
+    e.preventDefault();
+    if (!nameInput.trim()) return;
+    setNameBusy(true);
+    try {
+      await renameHousehold(nameInput.trim());
+      setEditingName(false);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setNameBusy(false);
+    }
   };
 
   const handleJoinSubmit = async (e) => {
@@ -136,19 +153,39 @@ export default function Sidebar() {
       {householdInfo && (
         <div style={{ marginBottom: 4 }}>
           <div style={{ padding: '8px 10px', background: 'var(--cream)', borderRadius: joining ? '10px 10px 0 0' : 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-            <div style={{ minWidth: 0 }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: 12, color: 'var(--stone)', fontWeight: 500, marginBottom: 1 }}>Household</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {householdInfo.name}
-              </div>
+              {editingName ? (
+                <form onSubmit={handleRename} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                  <input
+                    autoFocus
+                    value={nameInput}
+                    onChange={e => setNameInput(e.target.value)}
+                    maxLength={60}
+                    style={{ flex: 1, padding: '3px 6px', border: '1.5px solid var(--terracotta)', borderRadius: 6, fontSize: 12.5, fontFamily: 'DM Sans, sans-serif', outline: 'none', background: 'var(--warm-white)', color: 'var(--charcoal)', minWidth: 0 }}
+                  />
+                  <button type="submit" disabled={nameBusy || !nameInput.trim()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sage-dark)', fontSize: 14, padding: '0 2px', opacity: (!nameInput.trim() || nameBusy) ? 0.4 : 1 }}>✓</button>
+                  <button type="button" onClick={() => setEditingName(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--stone)', fontSize: 14, padding: '0 2px' }}>✕</button>
+                </form>
+              ) : (
+                <button
+                  onClick={() => { setNameInput(householdInfo.name); setEditingName(true); }}
+                  title="Rename household"
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: 'var(--charcoal)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: '100%', textAlign: 'left', fontFamily: 'DM Sans, sans-serif' }}
+                >
+                  {householdInfo.name}
+                </button>
+              )}
             </div>
-            <button
-              onClick={copyInviteCode}
-              title={copied ? 'Copied!' : `Invite code: ${householdInfo.inviteCode}`}
-              style={{ background: copied ? 'var(--sage-light)' : 'var(--warm-white)', border: '1px solid var(--stone-light)', borderRadius: 7, padding: '5px 8px', cursor: 'pointer', fontSize: 11, fontWeight: 600, color: copied ? 'var(--sage-dark)' : 'var(--stone)', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all .15s' }}
-            >
-              {copied ? '✓ Copied' : 'Invite'}
-            </button>
+            {!editingName && (
+              <button
+                onClick={copyInviteCode}
+                title={copied ? 'Copied!' : `Invite code: ${householdInfo.inviteCode}`}
+                style={{ background: copied ? 'var(--sage-light)' : 'var(--warm-white)', border: '1px solid var(--stone-light)', borderRadius: 7, padding: '5px 8px', cursor: 'pointer', fontSize: 11, fontWeight: 600, color: copied ? 'var(--sage-dark)' : 'var(--stone)', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all .15s' }}
+              >
+                {copied ? '✓ Copied' : 'Invite'}
+              </button>
+            )}
           </div>
 
           {joining ? (

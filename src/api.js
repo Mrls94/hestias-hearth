@@ -51,4 +51,5 @@ export const putShopping = (items) => req('PUT', '/shopping', { items });
 export const getHousehold    = ()      => req('GET',  '/household');
 export const createHousehold = (name)  => req('POST', '/household', { name });
 export const joinHousehold   = (code)  => req('POST', '/household/join', { code });
-export const leaveHousehold  = ()      => req('POST', '/household/leave');
+export const leaveHousehold  = ()      => req('POST',  '/household/leave');
+export const renameHousehold = (name)  => req('PATCH', '/household', { name });

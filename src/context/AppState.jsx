@@ -106,6 +106,11 @@ export function AppStateProvider({ children }) {
     setShoppingList([]);
   };
 
+  const renameHousehold = async (name) => {
+    await api.renameHousehold(name);
+    setHouseholdInfo(prev => ({ ...prev, name }));
+  };
+
   const switchHousehold = async (code) => {
     const info = await api.joinHousehold(code);
     setHouseholdInfo(info);
@@ -225,7 +230,7 @@ export function AppStateProvider({ children }) {
   return (
     <AppStateContext.Provider value={{
       loading,
-      householdInfo, needsHousehold, completeHouseholdSetup, leaveCurrentHousehold, switchHousehold,
+      householdInfo, needsHousehold, completeHouseholdSetup, leaveCurrentHousehold, switchHousehold, renameHousehold,
       recipes,      addRecipe,      updateRecipe,    deleteRecipe,
       pantry,       addPantryItem,  updatePantryItem, deletePantryItem,
       mealPlanner,  assignMeal,     clearMeal,
