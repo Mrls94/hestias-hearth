@@ -157,8 +157,10 @@ export default function Home() {
             {QA.map(({ icon, label, desc, color, to }) => (
               <button key={label} className="qa-card" onClick={() => navigate(to)}>
                 <div className={`qa-icon qa-icon-${color}`}>{icon}</div>
-                <div className="qa-label">{label}</div>
-                <div className="qa-desc">{desc}</div>
+                <div className="qa-text">
+                  <div className="qa-label">{label}</div>
+                  <div className="qa-desc">{desc}</div>
+                </div>
               </button>
             ))}
           </div>

@@ -576,11 +576,12 @@
 }
 .qa-card:hover { border-color: var(--terracotta-light); box-shadow: 0 6px 18px rgba(44,40,36,0.05); }
 .qa-card:active { transform: scale(0.98); }
-.qa-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.qa-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
 .qa-icon-terra { background: var(--terracotta-light); }
 .qa-icon-sage  { background: var(--sage-light); }
 .qa-icon-ochre { background: var(--ochre-light); }
 .qa-icon-stone { background: var(--stone-light); }
+.qa-text  { display: flex; flex-direction: column; gap: 3px; }
 .qa-label { font-size: 14px; font-weight: 600; color: var(--charcoal); }
 .qa-desc  { font-size: 12px; color: var(--stone); }
 
@@ -964,6 +965,41 @@
   .rg-img { height: 104px; }
   .rg-name { font-size: 13.5px; }
   .rg-meta { font-size: 11.5px; }
+
+  /* Home: recipe rail → 2-col grid, cap at 4 */
+  .recipe-rail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+  .recipe-rail .recipe-rail-card:nth-child(n+5) { display: none; }
+  .recipe-rail-card { width: auto; }
+  .rrc-img { height: 96px; font-size: 38px; }
+  .rrc-name { font-size: 13.5px; }
+  .rrc-meta { font-size: 11.5px; gap: 6px; }
+
+  /* Home: quick actions → full-width horizontal rows */
+  .qa-grid { grid-template-columns: 1fr; gap: 10px; }
+  .qa-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+  .qa-icon { width: 50px; height: 50px; border-radius: 14px; font-size: 23px; }
+  .qa-text { flex: 1; min-width: 0; }
+  .qa-label { font-size: 15px; }
+  .qa-desc  { font-size: 12.5px; }
+  .qa-card::after {
+    content: '›';
+    font-size: 22px;
+    color: var(--stone-light);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .qa-card:active { background: var(--cream); transform: scale(0.98); }
 }
 
 /* "Use it soon" alert rows — visible on desktop + mobile */
