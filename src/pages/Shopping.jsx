@@ -25,6 +25,7 @@ function groupByAisle(items) {
 export default function Shopping() {
   const { shoppingList, toggleShoppingChecked, generateShoppingFromPlanner, setShopping } = useAppState();
   const [pantrySync, setPantrySync] = useState(true);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   const total   = shoppingList.length;
   const checked = shoppingList.filter(i => i.checked).length;
@@ -119,12 +120,6 @@ export default function Shopping() {
         </div>
 
         {/* Actions */}
-        <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-          Export / print list
-        </button>
-        <button className="btn-ghost" style={{ width: '100%', justifyContent: 'center' }}>
-          Share with household
-        </button>
         <button
           className="btn-ghost"
           style={{ width: '100%', justifyContent: 'center' }}
@@ -133,12 +128,26 @@ export default function Shopping() {
           Regenerate from planner
         </button>
         {total > 0 && (
-          <button
-            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--stone)', marginTop: 4 }}
-            onClick={() => setShopping([])}
-          >
-            Clear list
-          </button>
+          confirmClear ? (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', padding: '4px 0' }}>
+              <span style={{ fontSize: 13, color: 'var(--charcoal)' }}>Clear {total} item{total !== 1 ? 's' : ''}?</span>
+              <button
+                style={{ fontSize: 13, fontWeight: 600, color: 'var(--terracotta-dark)', background: 'var(--terracotta-light)', border: 'none', cursor: 'pointer', padding: '5px 12px', borderRadius: 8 }}
+                onClick={() => { setShopping([]); setConfirmClear(false); }}
+              >Clear all</button>
+              <button
+                style={{ fontSize: 13, color: 'var(--stone)', background: 'none', border: 'none', cursor: 'pointer' }}
+                onClick={() => setConfirmClear(false)}
+              >Cancel</button>
+            </div>
+          ) : (
+            <button
+              style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--stone)', marginTop: 4 }}
+              onClick={() => setConfirmClear(true)}
+            >
+              Clear list
+            </button>
+          )
         )}
       </div>
 

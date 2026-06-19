@@ -46,11 +46,15 @@ export default function Home() {
   const todayMeals = mealPlanner[key] || {};
   const planned = weekPlanned(mealPlanner);
 
+  const getRecipe = (id) => id ? recipes.find(r => r.id === id || r.id === Number(id)) : null;
+
+  const todayKcal = MEAL_TYPES
+    .map(t => getRecipe(todayMeals[t])?.kcal || 0)
+    .reduce((a, b) => a + b, 0);
+
   const dateLabel = new Date()
     .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
     .toUpperCase();
-
-  const getRecipe = (id) => id ? recipes.find(r => r.id === id || r.id === Number(id)) : null;
 
   return (
     <>
@@ -71,7 +75,7 @@ export default function Home() {
             <div className="hero-stat-label">Planned</div>
           </div>
           <div className="hero-stat">
-            <div className="hero-stat-num">—</div>
+            <div className="hero-stat-num">{todayKcal > 0 ? todayKcal.toLocaleString() : '—'}</div>
             <div className="hero-stat-label">kcal today</div>
           </div>
         </div>
@@ -110,7 +114,6 @@ export default function Home() {
                       </div>
                     )}
                   </div>
-                  {recipe?.kcal && <div className="meal-cal">{recipe.kcal} kcal</div>}
                 </div>
               );
             })}
@@ -127,7 +130,6 @@ export default function Home() {
                   <div key={r.id} className="recipe-rail-card" onClick={() => navigate('/recipes')}>
                     <div className="rrc-img">
                       <span>{r.emoji || '🍽️'}</span>
-                      <span className="rrc-fav" aria-hidden="true">{r.favorite ? '♥' : '♡'}</span>
                     </div>
                     <div className="rrc-body">
                       <div className="rrc-name">{r.title}</div>
@@ -157,25 +159,6 @@ export default function Home() {
                 <div className="qa-desc">{desc}</div>
               </button>
             ))}
-          </div>
-
-          <div className="section-head">
-            <span className="section-title">Today's workout</span>
-          </div>
-          <div className="workout-card">
-            <div className="wc-head">
-              <div>
-                <div className="wc-label">Scheduled · 6:00 PM</div>
-                <div className="wc-title">Upper body strength</div>
-              </div>
-              <div className="wc-icon">💪</div>
-            </div>
-            <div className="wc-meta">
-              <span>⏱ 45 min</span>
-              <span>💪 Intermediate</span>
-              <span>🔥 ~320 kcal</span>
-            </div>
-            <button className="wc-btn">Start session</button>
           </div>
 
           {expiring.length > 0 && (

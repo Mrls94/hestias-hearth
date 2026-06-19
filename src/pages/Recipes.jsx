@@ -23,6 +23,7 @@ export default function Recipes() {
   const { recipes, addRecipe, deleteRecipe, updateRecipe } = useAppState();
   const [activeChip, setActiveChip] = useState(null);
   const [showCreator, setShowCreator] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   useEffect(() => {
     const handler = () => setShowCreator(true);
@@ -102,12 +103,26 @@ export default function Recipes() {
                   {r.kcal  && <span>🔥 {r.kcal} kcal</span>}
                   {!r.time && !r.kcal && r.difficulty && <span>{r.difficulty}</span>}
                 </div>
-                <button
-                  style={{ marginTop: 10, fontSize: 12, color: 'var(--stone)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                  onClick={() => deleteRecipe(r.id)}
-                >
-                  Delete
-                </button>
+                {pendingDelete === r.id ? (
+                  <div style={{ marginTop: 10, display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: 'var(--charcoal)', fontWeight: 500 }}>Delete recipe?</span>
+                    <button
+                      style={{ fontSize: 12, fontWeight: 600, color: 'var(--terracotta-dark)', background: 'var(--terracotta-light)', border: 'none', cursor: 'pointer', padding: '3px 10px', borderRadius: 7 }}
+                      onClick={() => { deleteRecipe(r.id); setPendingDelete(null); }}
+                    >Delete</button>
+                    <button
+                      style={{ fontSize: 12, color: 'var(--stone)', background: 'none', border: 'none', cursor: 'pointer' }}
+                      onClick={() => setPendingDelete(null)}
+                    >Cancel</button>
+                  </div>
+                ) : (
+                  <button
+                    style={{ marginTop: 10, fontSize: 12, color: 'var(--stone)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    onClick={() => setPendingDelete(r.id)}
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           ))}

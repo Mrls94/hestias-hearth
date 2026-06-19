@@ -52,13 +52,6 @@ const IcoBox = () => (
     <line x1="12" y1="22.08" x2="12" y2="12"/>
   </svg>
 );
-const IcoDumbbell = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M6.5 6.5h11M6.5 17.5h11"/>
-    <rect x="3" y="9" width="2" height="6" rx="1"/><rect x="19" y="9" width="2" height="6" rx="1"/>
-    <rect x="5" y="7" width="2" height="10" rx="1"/><rect x="17" y="7" width="2" height="10" rx="1"/>
-  </svg>
-);
 
 function NavItem({ to, icon, label, count, end }) {
   return (
@@ -98,9 +91,6 @@ export default function Sidebar() {
         <NavItem to="/pantry"   icon={<IcoBox />}      label="Pantry" />
       </nav>
 
-      <div className="nav-group-label">Fitness</div>
-      <NavItem to="/workouts" icon={<IcoDumbbell />} label="Workouts" />
-
       <div className="sidebar-spacer" />
 
       <div className="sidebar-card">
@@ -112,12 +102,11 @@ export default function Sidebar() {
       </div>
 
       <div className="profile">
-        <div className="avatar" aria-hidden="true">MR</div>
+        <div className="avatar" aria-hidden="true">S&amp;L</div>
         <div>
-          <div className="profile-name">Maya Rivera</div>
-          <div className="profile-sub">Household of 2</div>
+          <div className="profile-name">Seb &amp; Lau</div>
+          <div className="profile-sub">Our kitchen</div>
         </div>
-        <button className="profile-menu" aria-label="Profile options">⋯</button>
       </div>
     </aside>
   );

@@ -1,30 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from './AuthContext';
+import * as api from '../api';
 
 const AppStateContext = createContext(null);
 
-// ── Pantry migration helpers ─────────────────────────────────────────────────
-function loadPantry() {
-  try {
-    const next = localStorage.getItem('pantry');
-    if (next) return JSON.parse(next) || [];
-
-    // Migrate from old string[] "ingredients" key
-    const old = localStorage.getItem('ingredients');
-    if (old) {
-      const parsed = JSON.parse(old);
-      if (Array.isArray(parsed)) {
-        return parsed.map(item =>
-          typeof item === 'string'
-            ? { name: item, qty: '', category: 'Other', expiry: null }
-            : item
-        );
-      }
-    }
-  } catch { /* fall through */ }
-  return [];
-}
-
-// ── Expiry helpers ────────────────────────────────────────────────────────────
+// ── Expiry helpers (unchanged) ────────────────────────────────────────────────
 export function expiryStatus(expiry) {
   if (!expiry) return null;
   const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -38,74 +18,112 @@ export function expiryLabel(expiry) {
   if (!expiry) return null;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const diff = Math.floor((new Date(expiry) - today) / 86400000);
-  if (diff < 0)  return 'Expired';
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Tomorrow';
-  if (diff <= 7)  return `${diff}d left`;
+  if (diff < 0)   return 'Expired';
+  if (diff === 0)  return 'Today';
+  if (diff === 1)  return 'Tomorrow';
+  if (diff <= 7)   return `${diff}d left`;
   return new Date(expiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function AppStateProvider({ children }) {
-  const [recipes, setRecipes] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('recipes')) || []; } catch { return []; }
-  });
+  const { authState } = useAuth();
 
-  // pantry: [{ name, qty, category, expiry }] — migrated from old string[] on first load
-  const [pantry, setPantry] = useState(loadPantry);
+  const [loading, setLoading] = useState(true);
+  const [recipes, setRecipes]           = useState([]);
+  const [pantry, setPantry]             = useState([]);
+  const [mealPlanner, setMealPlanner]   = useState({});
+  const [shoppingList, setShoppingList] = useState([]);
 
-  const [mealPlanner, setMealPlanner] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('mealPlanner')) || {}; } catch { return {}; }
-  });
+  // ── Fetch all data once authenticated ───────────────────────────────────────
+  useEffect(() => {
+    if (authState !== 'authenticated') return;
+    setLoading(true);
+    Promise.all([
+      api.getRecipes(),
+      api.getPantry(),
+      api.getPlanner(),
+      api.getShopping(),
+    ]).then(([r, p, pl, s]) => {
+      setRecipes(r ?? []);
+      setPantry(p ?? []);
+      setMealPlanner(pl ?? {});
+      setShoppingList(s ?? []);
+    }).catch(console.error)
+      .finally(() => setLoading(false));
+  }, [authState]);
 
-  const [shoppingList, setShoppingList] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('shoppingList')) || []; } catch { return []; }
-  });
+  // ── Recipe helpers ───────────────────────────────────────────────────────────
+  const addRecipe = (r) => {
+    setRecipes(prev => [r, ...prev]);
+    api.saveRecipe(r).catch(console.error);
+  };
 
-  // ── Persistence ──────────────────────────────────────────────────────────
-  useEffect(() => { localStorage.setItem('recipes',     JSON.stringify(recipes));     }, [recipes]);
-  useEffect(() => { localStorage.setItem('pantry',      JSON.stringify(pantry));
-                    localStorage.removeItem('ingredients'); /* clean up old key */     }, [pantry]);
-  useEffect(() => { localStorage.setItem('mealPlanner', JSON.stringify(mealPlanner)); }, [mealPlanner]);
-  useEffect(() => { localStorage.setItem('shoppingList',JSON.stringify(shoppingList));}, [shoppingList]);
+  const updateRecipe = (id, patch) => {
+    setRecipes(prev => {
+      const next = prev.map(r => r.id === id ? { ...r, ...patch } : r);
+      const updated = next.find(r => r.id === id);
+      if (updated) api.saveRecipe(updated).catch(console.error);
+      return next;
+    });
+  };
 
-  // ── Recipe helpers ───────────────────────────────────────────────────────
-  const addRecipe    = (r)       => setRecipes(p => [r, ...p]);
-  const updateRecipe = (id, patch) => setRecipes(p => p.map(r => r.id === id ? { ...r, ...patch } : r));
-  const deleteRecipe = (id)      => setRecipes(p => p.filter(r => r.id !== id));
+  const deleteRecipe = (id) => {
+    setRecipes(prev => prev.filter(r => r.id !== id));
+    api.removeRecipe(id).catch(console.error);
+  };
 
-  // ── Pantry helpers ───────────────────────────────────────────────────────
+  // ── Pantry helpers ───────────────────────────────────────────────────────────
+  const syncPantry = (updater) => {
+    setPantry(prev => {
+      const next = updater(prev);
+      api.putPantry(next).catch(console.error);
+      return next;
+    });
+  };
+
   const addPantryItem = (item) =>
-    setPantry(p => p.some(i => i.name.toLowerCase() === item.name.toLowerCase()) ? p : [...p, item]);
+    syncPantry(p => p.some(i => i.name.toLowerCase() === item.name.toLowerCase()) ? p : [...p, item]);
 
   const updatePantryItem = (name, patch) =>
-    setPantry(p => p.map(i => i.name === name ? { ...i, ...patch } : i));
+    syncPantry(p => p.map(i => i.name === name ? { ...i, ...patch } : i));
 
   const deletePantryItem = (name) =>
-    setPantry(p => p.filter(i => i.name !== name));
+    syncPantry(p => p.filter(i => i.name !== name));
 
-  // ── Planner helpers ──────────────────────────────────────────────────────
-  // planner shape: { 'YYYY-MM-DD': { Breakfast?: recipeId, Lunch?: recipeId, Dinner?: recipeId } }
-  const assignMeal = (dateKey, mealType, recipeId) =>
-    setMealPlanner(prev => ({
-      ...prev,
-      [dateKey]: { ...(prev[dateKey] || {}), [mealType]: recipeId },
-    }));
+  // ── Planner helpers ──────────────────────────────────────────────────────────
+  const assignMeal = (dateKey, mealType, recipeId) => {
+    setMealPlanner(prev => {
+      const updatedDay = { ...(prev[dateKey] || {}), [mealType]: recipeId };
+      api.putPlannerDay(dateKey, updatedDay).catch(console.error);
+      return { ...prev, [dateKey]: updatedDay };
+    });
+  };
 
-  const clearMeal = (dateKey, mealType) =>
+  const clearMeal = (dateKey, mealType) => {
     setMealPlanner(prev => {
       if (!prev[dateKey]) return prev;
       const day = { ...prev[dateKey] };
       delete day[mealType];
+      api.putPlannerDay(dateKey, day).catch(console.error);
       return { ...prev, [dateKey]: day };
     });
+  };
 
-  // ── Shopping helpers ─────────────────────────────────────────────────────
-  const setShopping          = (items) => setShoppingList(items);
-  const addShoppingItem      = (item)  => setShoppingList(p => [...p, item]);
+  // ── Shopping helpers ─────────────────────────────────────────────────────────
+  const syncShopping = (updater) => {
+    setShoppingList(prev => {
+      const next = updater(prev);
+      api.putShopping(next).catch(console.error);
+      return next;
+    });
+  };
+
+  const setShopping          = (items) => syncShopping(() => items);
+  const addShoppingItem      = (item)  => syncShopping(p => [...p, item]);
   const toggleShoppingChecked = (index) =>
-    setShoppingList(p => p.map((it, i) => i === index ? { ...it, checked: !it.checked } : it));
+    syncShopping(p => p.map((it, i) => i === index ? { ...it, checked: !it.checked } : it));
 
   const generateShoppingFromPlanner = () => {
     const usedIds = Object.values(mealPlanner)
@@ -120,16 +138,17 @@ export function AppStateProvider({ children }) {
       })
     );
     const items = Object.keys(counts).map(k => ({ name: k, quantity: counts[k], checked: false }));
-    setShoppingList(items);
+    syncShopping(() => items);
     return items;
   };
 
   return (
     <AppStateContext.Provider value={{
-      recipes, addRecipe, updateRecipe, deleteRecipe,
-      pantry,  addPantryItem, updatePantryItem, deletePantryItem,
-      mealPlanner, assignMeal, clearMeal,
-      shoppingList, setShopping, addShoppingItem, toggleShoppingChecked, generateShoppingFromPlanner,
+      loading,
+      recipes,      addRecipe,      updateRecipe,    deleteRecipe,
+      pantry,       addPantryItem,  updatePantryItem, deletePantryItem,
+      mealPlanner,  assignMeal,     clearMeal,
+      shoppingList, setShopping,    addShoppingItem,  toggleShoppingChecked, generateShoppingFromPlanner,
     }}>
       {children}
     </AppStateContext.Provider>

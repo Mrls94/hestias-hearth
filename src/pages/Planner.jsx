@@ -235,28 +235,6 @@ export default function Planner() {
           );
         })}
 
-        {/* Workout block — static placeholder */}
-        <div className="plan-block">
-          <div className="plan-block-head">
-            <span className="pb-icon">💪</span>
-            <span className="pb-label">Workout</span>
-          </div>
-          <div className="workout-card" style={{ marginTop: 0 }}>
-            <div className="wc-head">
-              <div>
-                <div className="wc-label">Scheduled · 6:00 PM</div>
-                <div className="wc-title">Upper body strength</div>
-              </div>
-              <div className="wc-icon">💪</div>
-            </div>
-            <div className="wc-meta">
-              <span>⏱ 45 min</span>
-              <span>💪 Intermediate</span>
-              <span>🔥 ~320 kcal</span>
-            </div>
-            <button className="wc-btn">Start session</button>
-          </div>
-        </div>
       </div>
     </>
   );

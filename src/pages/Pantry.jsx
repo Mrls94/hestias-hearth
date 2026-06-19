@@ -74,6 +74,7 @@ export default function Pantry() {
 
   const [form, setForm] = useState({ name: '', qty: '', category: 'Other', expiry: '' });
   const [msg,  setMsg]  = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -194,6 +195,23 @@ export default function Pantry() {
                 const status = expiryStatus(item.expiry);
                 const label  = expiryLabel(item.expiry);
                 const catEmoji = CAT_META[item.category]?.emoji || '📦';
+                if (confirmDelete === item.name) {
+                  return (
+                    <div key={item.name} className="pantry-item-row" style={{ background: 'var(--terracotta-light)', gap: 10 }}>
+                      <span style={{ flex: 1, fontSize: 13.5, color: 'var(--terracotta-dark)', fontWeight: 500 }}>
+                        Remove "{item.name}"?
+                      </span>
+                      <button
+                        style={{ fontSize: 13, fontWeight: 600, color: 'var(--terracotta-dark)', background: '#fff', border: '1px solid var(--terracotta-light)', cursor: 'pointer', padding: '5px 12px', borderRadius: 8 }}
+                        onClick={() => { deletePantryItem(item.name); setConfirmDelete(null); }}
+                      >Remove</button>
+                      <button
+                        style={{ fontSize: 13, color: 'var(--stone)', background: 'none', border: 'none', cursor: 'pointer', padding: '5px 8px' }}
+                        onClick={() => setConfirmDelete(null)}
+                      >Cancel</button>
+                    </div>
+                  );
+                }
                 return (
                   <div key={item.name} className="pantry-item-row">
                     <div className="pantry-item-icon">{catEmoji}</div>
@@ -205,7 +223,7 @@ export default function Pantry() {
                     <button
                       className="pantry-item-del"
                       aria-label={`Remove ${item.name}`}
-                      onClick={() => deletePantryItem(item.name)}
+                      onClick={() => setConfirmDelete(item.name)}
                     >
                       ×
                     </button>

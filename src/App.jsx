@@ -1,5 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import { useAppState } from './context/AppState';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import BottomNav from './components/BottomNav';
@@ -9,9 +11,21 @@ import Recipes from './pages/Recipes';
 import Shopping from './pages/Shopping';
 import Planner from './pages/Planner';
 import Pantry from './pages/Pantry';
+import Login from './pages/Login';
 import './App.css';
 
-export default function App() {
+function LoadingScreen() {
+  return (
+    <div className="loading-root">
+      <div className="loading-flame">🔥</div>
+      <div className="loading-spinner" />
+    </div>
+  );
+}
+
+function AppShell() {
+  const { loading } = useAppState();
+  if (loading) return <LoadingScreen />;
   return (
     <div className="app-shell">
       <Sidebar />
@@ -31,4 +45,11 @@ export default function App() {
       <FloatingActionButton />
     </div>
   );
+}
+
+export default function App() {
+  const { authState } = useAuth();
+  if (authState === 'loading') return <LoadingScreen />;
+  if (authState !== 'authenticated') return <Login />;
+  return <AppShell />;
 }

@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppState } from '../context/AppState';
+import { useAuth } from '../context/AuthContext';
 
 const dateLabel = new Date().toLocaleDateString('en-US', {
   weekday: 'long', month: 'long', day: 'numeric',
@@ -38,6 +39,10 @@ export default function Topbar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { pantry, recipes } = useAppState();
+  const { userEmail, signOut } = useAuth();
+  const [showSignOut, setShowSignOut] = useState(false);
+
+  const userInitial = userEmail ? userEmail[0].toUpperCase() : '?';
 
   // Scroll hairline: add/remove .scrolled on the topbar as #main scrolls
   useEffect(() => {
@@ -75,7 +80,17 @@ export default function Topbar() {
           <BellIcon />
           <span className="dot" aria-hidden="true" />
         </button>
-        <button className="avatar-btn">MR</button>
+        <div style={{ position: 'relative' }}>
+          <button className="avatar-btn" onClick={() => setShowSignOut(v => !v)}>{userInitial}</button>
+          {showSignOut && (
+            <div style={{ position: 'absolute', right: 0, top: '110%', background: 'var(--surface)', border: '1px solid var(--stone-light)', borderRadius: 8, padding: '4px 0', zIndex: 100, minWidth: 120, boxShadow: '0 4px 12px rgba(0,0,0,.1)' }}>
+              <button onClick={() => { setShowSignOut(false); signOut(); }}
+                style={{ width: '100%', padding: '8px 16px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--charcoal)' }}>
+                Sign out
+              </button>
+            </div>
+          )}
+        </div>
       </>
     );
   } else if (pathname === '/shopping') {
