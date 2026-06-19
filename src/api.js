@@ -21,7 +21,11 @@ async function req(method, path, body) {
   };
   if (body !== undefined) init.body = JSON.stringify(body);
   const res = await fetch(`${API_URL}${path}`, init);
-  if (!res.ok) throw new Error(`${method} ${path} → ${res.status}`);
+  if (!res.ok) {
+    const err = new Error(`${method} ${path} → ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
   const text = await res.text();
   return text ? JSON.parse(text) : null;
 }
@@ -42,3 +46,9 @@ export const putPlannerDay = (date, day) => req('PUT', `/planner/${date}`, day);
 // Shopping
 export const getShopping = ()      => req('GET', '/shopping');
 export const putShopping = (items) => req('PUT', '/shopping', { items });
+
+// Household
+export const getHousehold    = ()      => req('GET',  '/household');
+export const createHousehold = (name)  => req('POST', '/household', { name });
+export const joinHousehold   = (code)  => req('POST', '/household/join', { code });
+export const leaveHousehold  = ()      => req('POST', '/household/leave');

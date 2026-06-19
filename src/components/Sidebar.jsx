@@ -69,11 +69,40 @@ function NavItem({ to, icon, label, count, end }) {
 }
 
 export default function Sidebar() {
-  const { mealPlanner, recipes, shoppingList } = useAppState();
+  const { mealPlanner, recipes, shoppingList, householdInfo, switchHousehold } = useAppState();
   const { userName, userEmail, signOut } = useAuth();
   const navigate = useNavigate();
   const planned = countPlannedMeals(mealPlanner);
   const shoppingCount = shoppingList.filter(i => !i.checked).length;
+  const [copied, setCopied]       = React.useState(false);
+  const [joining, setJoining]     = React.useState(false);
+  const [joinCode, setJoinCode]   = React.useState('');
+  const [joinErr, setJoinErr]     = React.useState('');
+  const [joinBusy, setJoinBusy]   = React.useState(false);
+
+  const copyInviteCode = () => {
+    if (!householdInfo?.inviteCode) return;
+    navigator.clipboard.writeText(householdInfo.inviteCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleJoinSubmit = async (e) => {
+    e.preventDefault();
+    if (!joinCode.trim()) return;
+    setJoinBusy(true);
+    setJoinErr('');
+    try {
+      await switchHousehold(joinCode.trim());
+      setJoining(false);
+      setJoinCode('');
+    } catch (err) {
+      setJoinErr(err.status === 404 ? 'Code not found.' : 'Could not join.');
+    } finally {
+      setJoinBusy(false);
+    }
+  };
 
   return (
     <aside className="sidebar">
@@ -103,11 +132,74 @@ export default function Sidebar() {
         </button>
       </div>
 
+      {/* Household bar */}
+      {householdInfo && (
+        <div style={{ marginBottom: 4 }}>
+          <div style={{ padding: '8px 10px', background: 'var(--cream)', borderRadius: joining ? '10px 10px 0 0' : 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 12, color: 'var(--stone)', fontWeight: 500, marginBottom: 1 }}>Household</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--charcoal)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {householdInfo.name}
+              </div>
+            </div>
+            <button
+              onClick={copyInviteCode}
+              title={copied ? 'Copied!' : `Invite code: ${householdInfo.inviteCode}`}
+              style={{ background: copied ? 'var(--sage-light)' : 'var(--warm-white)', border: '1px solid var(--stone-light)', borderRadius: 7, padding: '5px 8px', cursor: 'pointer', fontSize: 11, fontWeight: 600, color: copied ? 'var(--sage-dark)' : 'var(--stone)', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all .15s' }}
+            >
+              {copied ? '✓ Copied' : 'Invite'}
+            </button>
+          </div>
+
+          {joining ? (
+            <form
+              onSubmit={handleJoinSubmit}
+              style={{ background: 'var(--cream)', borderRadius: '0 0 10px 10px', padding: '6px 10px 10px', display: 'flex', flexDirection: 'column', gap: 5 }}
+            >
+              <input
+                autoFocus
+                value={joinCode}
+                onChange={e => { setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')); setJoinErr(''); }}
+                placeholder="Invite code"
+                maxLength={8}
+                style={{ padding: '6px 9px', border: '1.5px solid var(--stone-light)', borderRadius: 7, fontSize: 12.5, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.08em', outline: 'none', background: 'var(--warm-white)', color: 'var(--charcoal)', textTransform: 'uppercase' }}
+              />
+              {joinErr && <div style={{ fontSize: 11.5, color: '#c0392b' }}>{joinErr}</div>}
+              <div style={{ display: 'flex', gap: 5 }}>
+                <button
+                  type="submit"
+                  disabled={joinBusy || joinCode.length < 4}
+                  style={{ flex: 1, padding: '5px 0', background: 'var(--terracotta)', color: '#fff', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', opacity: (joinBusy || joinCode.length < 4) ? 0.55 : 1 }}
+                >
+                  {joinBusy ? '…' : 'Join'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setJoining(false); setJoinCode(''); setJoinErr(''); }}
+                  style={{ padding: '5px 8px', background: 'none', border: '1px solid var(--stone-light)', borderRadius: 7, fontSize: 12, color: 'var(--stone)', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : (
+            <button
+              onClick={() => setJoining(true)}
+              style={{ width: '100%', background: 'none', border: 'none', fontSize: 11.5, color: 'var(--stone)', cursor: 'pointer', textAlign: 'left', padding: '3px 10px 0', fontFamily: 'DM Sans, sans-serif' }}
+            >
+              Join a different household →
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="profile">
         <div className="avatar" aria-hidden="true">{(userName || userEmail || '?')[0].toUpperCase()}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="profile-name">{userName || userEmail}</div>
-          <div className="profile-sub">Our kitchen</div>
+          <div className="profile-sub">
+            {householdInfo?.memberCount > 1 ? `${householdInfo.memberCount} members` : 'Just you'}
+          </div>
         </div>
         <button
           onClick={signOut}

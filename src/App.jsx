@@ -12,6 +12,7 @@ import Shopping from './pages/Shopping';
 import Planner from './pages/Planner';
 import Pantry from './pages/Pantry';
 import Login from './pages/Login';
+import HouseholdSetup from './pages/HouseholdSetup';
 import './App.css';
 
 function LoadingScreen() {
@@ -24,8 +25,9 @@ function LoadingScreen() {
 }
 
 function AppShell() {
-  const { loading } = useAppState();
+  const { loading, needsHousehold, completeHouseholdSetup } = useAppState();
   if (loading) return <LoadingScreen />;
+  if (needsHousehold) return <HouseholdSetup onComplete={completeHouseholdSetup} />;
   return (
     <div className="app-shell">
       <Sidebar />

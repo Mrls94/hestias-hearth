@@ -47,29 +47,73 @@ export function expiryLabel(expiry) {
 export function AppStateProvider({ children }) {
   const { authState } = useAuth();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]           = useState(true);
+  const [needsHousehold, setNeedsHousehold] = useState(false);
+  const [householdInfo, setHouseholdInfo]   = useState(null);
   const [recipes, setRecipes]           = useState([]);
   const [pantry, setPantry]             = useState([]);
   const [mealPlanner, setMealPlanner]   = useState({});
   const [shoppingList, setShoppingList] = useState([]);
 
-  // ── Fetch all data once authenticated ───────────────────────────────────────
-  useEffect(() => {
-    if (authState !== 'authenticated') return;
-    setLoading(true);
-    Promise.all([
+  const fetchData = async () => {
+    const [r, p, pl, s] = await Promise.all([
       api.getRecipes(),
       api.getPantry(),
       api.getPlanner(),
       api.getShopping(),
-    ]).then(([r, p, pl, s]) => {
-      setRecipes(r ?? []);
-      setPantry(p ?? []);
-      setMealPlanner(pl ?? {});
-      setShoppingList(s ?? []);
-    }).catch(console.error)
+    ]);
+    setRecipes(r ?? []);
+    setPantry(p ?? []);
+    setMealPlanner(pl ?? {});
+    setShoppingList(s ?? []);
+  };
+
+  // ── Fetch all data once authenticated ───────────────────────────────────────
+  useEffect(() => {
+    if (authState !== 'authenticated') return;
+    setLoading(true);
+    api.getHousehold()
+      .then(info => {
+        setHouseholdInfo(info);
+        setNeedsHousehold(false);
+        return fetchData();
+      })
+      .catch(err => {
+        if (err.status === 403) {
+          setNeedsHousehold(true);
+        } else {
+          console.error(err);
+        }
+      })
       .finally(() => setLoading(false));
   }, [authState]);
+
+  const completeHouseholdSetup = async (info) => {
+    setHouseholdInfo(info);
+    setNeedsHousehold(false);
+    setLoading(true);
+    try { await fetchData(); } catch (err) { console.error(err); }
+    finally { setLoading(false); }
+  };
+
+  const leaveCurrentHousehold = async () => {
+    await api.leaveHousehold();
+    setHouseholdInfo(null);
+    setNeedsHousehold(true);
+    setRecipes([]);
+    setPantry([]);
+    setMealPlanner({});
+    setShoppingList([]);
+  };
+
+  const switchHousehold = async (code) => {
+    const info = await api.joinHousehold(code);
+    setHouseholdInfo(info);
+    setLoading(true);
+    try { await fetchData(); } catch (err) { console.error(err); }
+    finally { setLoading(false); }
+    return info;
+  };
 
   // ── Recipe helpers ───────────────────────────────────────────────────────────
   const addRecipe = (r) => {
@@ -181,6 +225,7 @@ export function AppStateProvider({ children }) {
   return (
     <AppStateContext.Provider value={{
       loading,
+      householdInfo, needsHousehold, completeHouseholdSetup, leaveCurrentHousehold, switchHousehold,
       recipes,      addRecipe,      updateRecipe,    deleteRecipe,
       pantry,       addPantryItem,  updatePantryItem, deletePantryItem,
       mealPlanner,  assignMeal,     clearMeal,
