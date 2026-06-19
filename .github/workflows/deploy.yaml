@@ -17,6 +17,10 @@ jobs:
 
       - run: npm install
       - run: npm run build
+        env:
+          VITE_COGNITO_USER_POOL_ID: ${{ secrets.VITE_COGNITO_USER_POOL_ID }}
+          VITE_COGNITO_CLIENT_ID: ${{ secrets.VITE_COGNITO_CLIENT_ID }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@master
