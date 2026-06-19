@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingPassword, setPendingPassword] = useState('');
   const [pendingName, setPendingName] = useState('');
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export function AuthProvider({ children }) {
     pool.signUp(email, password, attrs, null, (err, result) => {
       if (err) return reject(err);
       setPendingEmail(email);
+      setPendingPassword(password);
       setPendingName(name);
       setAuthState('confirming');
       resolve(result);
@@ -57,10 +59,15 @@ export function AuthProvider({ children }) {
 
   const confirmSignUp = (code) => new Promise((resolve, reject) => {
     const user = new CognitoUser({ Username: pendingEmail, Pool: pool });
-    user.confirmRegistration(code, true, (err) => {
+    user.confirmRegistration(code, true, async (err) => {
       if (err) return reject(err);
-      setUserName(pendingName);
-      setAuthState('unauthenticated'); // confirmed — now sign in
+      try {
+        await signIn(pendingEmail, pendingPassword);
+        setPendingPassword('');
+      } catch {
+        setUserName(pendingName);
+        setAuthState('unauthenticated');
+      }
       resolve();
     });
   });
