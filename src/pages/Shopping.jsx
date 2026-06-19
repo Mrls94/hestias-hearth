@@ -23,14 +23,28 @@ function groupByAisle(items) {
 }
 
 export default function Shopping() {
-  const { shoppingList, toggleShoppingChecked, generateShoppingFromPlanner, setShopping } = useAppState();
+  const { shoppingList, toggleShoppingChecked, generateShoppingFromPlanner, setShopping, moveCheckedToPantry, pantry } = useAppState();
   const [pantrySync, setPantrySync] = useState(true);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [movedMsg, setMovedMsg] = useState('');
 
   const total   = shoppingList.length;
   const checked = shoppingList.filter(i => i.checked).length;
   const pct     = total ? Math.round((checked / total) * 100) : 0;
-  const groups  = groupByAisle(shoppingList);
+
+  const pantryNames = new Set((pantry || []).map(i => i.name.toLowerCase()));
+  const visibleList = pantrySync
+    ? shoppingList.filter(i => !pantryNames.has(i.name.toLowerCase()))
+    : shoppingList;
+  const groups  = groupByAisle(visibleList);
+
+  const handleMoveToPanel = () => {
+    const n = moveCheckedToPantry();
+    if (n) {
+      setMovedMsg(`${n} item${n !== 1 ? 's' : ''} moved to pantry`);
+      setTimeout(() => setMovedMsg(''), 3000);
+    }
+  };
 
   return (
     <div className="shop-layout">
@@ -56,6 +70,7 @@ export default function Shopping() {
                 </div>
                 {aisle.items.map(item => {
                   const idx = shoppingList.findIndex(i => i.name === item.name);
+
                   return (
                     <div key={item.name} className="shop-item" onClick={() => toggleShoppingChecked(idx)}>
                       <div className={`check${item.checked ? ' checked' : ''}`}>
@@ -102,12 +117,32 @@ export default function Shopping() {
           <div className="shop-summary-pct">{pct}% complete</div>
         </div>
 
+        {/* Move to pantry */}
+        {checked > 0 && (
+          <button
+            className="btn-primary"
+            style={{ width: '100%', justifyContent: 'center' }}
+            onClick={handleMoveToPanel}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="17" height="17">
+              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+            Move {checked} item{checked !== 1 ? 's' : ''} to pantry
+          </button>
+        )}
+        {movedMsg && (
+          <div style={{ fontSize: 13, color: 'var(--sage-dark)', fontWeight: 500, textAlign: 'center', padding: '4px 0' }}>
+            ✓ {movedMsg}
+          </div>
+        )}
+
         {/* Pantry sync toggle */}
         <div className="shop-toggle-card">
           <div>
             <div style={{ fontWeight: 600, fontSize: 14 }}>Hide pantry items</div>
             <div style={{ fontSize: 12.5, color: 'var(--stone)', marginTop: 2 }}>
-              Pantry sync is {pantrySync ? 'on' : 'off'}
+              {pantrySync ? `Hiding ${shoppingList.length - visibleList.length} owned item${shoppingList.length - visibleList.length !== 1 ? 's' : ''}` : 'Showing all items'}
             </div>
           </div>
           <button

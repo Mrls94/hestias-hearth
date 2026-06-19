@@ -4,6 +4,23 @@ import * as api from '../api';
 
 const AppStateContext = createContext(null);
 
+const PANTRY_CAT_KEYWORDS = {
+  Produce:            ['onion','garlic','tomato','lettuce','spinach','carrot','potato','broccoli','pepper','celery','cucumber','mushroom','lemon','lime','apple','banana','herb','basil','parsley','cilantro','avocado','zucchini','kale','leek','ginger','shallot','chili','scallion','spring onion'],
+  Protein:            ['meat','chicken','fish','beef','pork','turkey','salmon','tuna','shrimp','tofu','egg','lentil','bean','lamb','prawn','mince','bacon','sausage','steak'],
+  Dairy:              ['milk','cheese','butter','cream','yogurt','mozzarella','parmesan','cheddar','feta','ricotta','brie','gouda'],
+  Grains:             ['pasta','rice','flour','bread','oat','noodle','couscous','quinoa','barley','wheat','tortilla','pita'],
+  'Oils & Condiments':['oil','vinegar','sauce','ketchup','mustard','mayo','soy','worcestershire','dressing','marinade','seasoning','spice','salt','pepper','cumin','paprika','oregano','cinnamon'],
+  'Tins & Jars':      ['tin','canned','jar','tomato paste','crushed tomato','coconut milk','stock','broth','chickpea','kidney'],
+};
+
+function guessCategory(name) {
+  const lower = name.toLowerCase();
+  for (const [cat, keywords] of Object.entries(PANTRY_CAT_KEYWORDS)) {
+    if (keywords.some(k => lower.includes(k))) return cat;
+  }
+  return 'Other';
+}
+
 // ── Expiry helpers (unchanged) ────────────────────────────────────────────────
 export function expiryStatus(expiry) {
   if (!expiry) return null;
@@ -125,6 +142,25 @@ export function AppStateProvider({ children }) {
   const toggleShoppingChecked = (index) =>
     syncShopping(p => p.map((it, i) => i === index ? { ...it, checked: !it.checked } : it));
 
+  const moveCheckedToPantry = () => {
+    const checkedItems = shoppingList.filter(i => i.checked);
+    if (!checkedItems.length) return 0;
+    syncPantry(prev => {
+      const existing = new Set(prev.map(i => i.name.toLowerCase()));
+      const toAdd = checkedItems
+        .filter(i => !existing.has(i.name.toLowerCase()))
+        .map(i => ({
+          name: i.name,
+          qty: i.quantity > 1 ? `×${i.quantity}` : '',
+          category: guessCategory(i.name),
+          expiry: null,
+        }));
+      return [...prev, ...toAdd];
+    });
+    syncShopping(p => p.filter(i => !i.checked));
+    return checkedItems.length;
+  };
+
   const generateShoppingFromPlanner = () => {
     const usedIds = Object.values(mealPlanner)
       .flatMap(d => Object.values(d || {}))
@@ -148,7 +184,7 @@ export function AppStateProvider({ children }) {
       recipes,      addRecipe,      updateRecipe,    deleteRecipe,
       pantry,       addPantryItem,  updatePantryItem, deletePantryItem,
       mealPlanner,  assignMeal,     clearMeal,
-      shoppingList, setShopping,    addShoppingItem,  toggleShoppingChecked, generateShoppingFromPlanner,
+      shoppingList, setShopping,    addShoppingItem,  toggleShoppingChecked, generateShoppingFromPlanner, moveCheckedToPantry,
     }}>
       {children}
     </AppStateContext.Provider>

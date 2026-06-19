@@ -1099,7 +1099,7 @@
 .rc-save-card .btn-primary { justify-content: center; }
 .rc-blessing { font-size: 12px; color: var(--stone); font-style: italic; text-align: center; line-height: 1.5; margin: 0; }
 
-.rc-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(140%); background: var(--sage-dark); color: #fff; padding: 14px 22px; border-radius: 14px; font-size: 14px; font-weight: 500; box-shadow: 0 14px 34px rgba(44,40,36,0.25); display: flex; align-items: center; gap: 11px; z-index: 200; transition: transform 0.42s cubic-bezier(.2,.9,.3,1.2); max-width: 90vw; pointer-events: none; }
+.rc-toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(calc(100% + 80px)); background: var(--sage-dark); color: #fff; padding: 14px 22px; border-radius: 14px; font-size: 14px; font-weight: 500; box-shadow: 0 14px 34px rgba(44,40,36,0.25); display: flex; align-items: center; gap: 11px; z-index: 200; transition: transform 0.42s cubic-bezier(.2,.9,.3,1.2); max-width: 90vw; pointer-events: none; }
 .rc-toast.show { transform: translateX(-50%) translateY(0); }
 .rc-toast-emoji { font-size: 20px; }
 
