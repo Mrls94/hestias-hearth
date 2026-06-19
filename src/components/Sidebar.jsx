@@ -132,11 +132,11 @@ export default function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        <NavItem to="/"         icon={<IcoHome />}     label="Home"     end />
-        <NavItem to="/planner"  icon={<IcoCalendar />} label="Planner" />
-        <NavItem to="/recipes"  icon={<IcoBook />}     label="Recipes"  count={recipes.length || null} />
-        <NavItem to="/shopping" icon={<IcoCart />}     label="Shopping" count={shoppingCount || null} />
-        <NavItem to="/pantry"   icon={<IcoBox />}      label="Pantry" />
+        <NavItem to="/"         icon={<IcoHome />}     label="Hearth"   end />
+        <NavItem to="/planner"  icon={<IcoCalendar />} label="Oracle" />
+        <NavItem to="/recipes"  icon={<IcoBook />}     label="Scrolls"  count={recipes.length || null} />
+        <NavItem to="/shopping" icon={<IcoCart />}     label="Agora"    count={shoppingCount || null} />
+        <NavItem to="/pantry"   icon={<IcoBox />}      label="Larder" />
       </nav>
 
       <div className="sidebar-spacer" />

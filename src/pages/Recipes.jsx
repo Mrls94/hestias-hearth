@@ -242,8 +242,8 @@ export default function Recipes() {
       {filtered.length === 0 ? (
         <div style={{ color: 'var(--stone)', padding: '48px 0', textAlign: 'center' }}>
           {activeChip
-            ? `No ${activeChip} recipes yet. Try a different filter or add one below.`
-            : 'No recipes yet — add one or import samples.'}
+            ? `The scrolls hold no ${activeChip} recipes. Try a different filter or add one below.`
+            : 'The scrolls are blank. Add your first recipe or import samples to begin.'}
         </div>
       ) : (
         <div className="recipe-grid">

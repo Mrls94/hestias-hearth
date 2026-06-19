@@ -53,7 +53,7 @@ export default function Shopping() {
       <div>
         {total === 0 ? (
           <div className="card" style={{ padding: '32px 28px', color: 'var(--stone)' }}>
-            <p style={{ marginBottom: 16 }}>No items yet. Generate a shopping list from your meal plan, or add items manually.</p>
+            <p style={{ marginBottom: 16 }}>The Agora awaits. Generate a list from your meal plan or add items below.</p>
             <button className="btn-primary" onClick={generateShoppingFromPlanner}>
               Generate from planner
             </button>

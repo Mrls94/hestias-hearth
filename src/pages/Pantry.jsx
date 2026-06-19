@@ -180,7 +180,7 @@ export default function Pantry() {
       {/* ── Groups ── */}
       {pantry.length === 0 ? (
         <div className="card" style={{ padding: '32px 28px', color: 'var(--stone)', textAlign: 'center' }}>
-          <p style={{ marginBottom: 16 }}>Your pantry is empty. Add items above or import samples to get started.</p>
+          <p style={{ marginBottom: 16 }}>The larder stands empty. Add provisions above or import samples to stock Hestia's stores.</p>
           <button className="btn-primary" onClick={importSamples}>Import samples</button>
         </div>
       ) : (

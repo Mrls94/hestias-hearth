@@ -8,12 +8,21 @@ const dateLabel = new Date().toLocaleDateString('en-US', {
 });
 
 const STATIC_CONFIG = {
-  '/':         { title: 'Home',     eyebrow: dateLabel },
-  '/recipes':  { title: 'Recipes',  eyebrow: 'Your recipe collection' },
-  '/planner':  { title: 'Planner',  eyebrow: 'Meal & workout planner' },
-  '/shopping': { title: 'Shopping', eyebrow: 'This week · aisle-sorted' },
+  '/':         { title: 'Hearth',  eyebrow: dateLabel },
+  '/recipes':  { title: 'Scrolls', eyebrow: 'Your recipe collection' },
+  '/planner':  { title: 'Oracle',  eyebrow: 'Meal & workout planner' },
+  '/shopping': { title: 'Agora',   eyebrow: 'This week · aisle-sorted' },
   '/workouts': { title: 'Workouts', eyebrow: 'Scheduled sessions' },
 };
+
+const LaurelSprig = ({ className = '' }) => (
+  <svg className={`laurel-sprig ${className}`} viewBox="0 0 22 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M1,13 C6,10 13,7 21,1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+    <ellipse cx="7" cy="10" rx="4" ry="2" fill="currentColor" opacity="0.8" transform="rotate(-25 7 10)"/>
+    <ellipse cx="13" cy="6" rx="3.5" ry="1.8" fill="currentColor" opacity="0.8" transform="rotate(-40 13 6)"/>
+    <ellipse cx="20" cy="2" rx="3" ry="1.5" fill="currentColor" opacity="0.8" transform="rotate(-55 20 2)"/>
+  </svg>
+);
 
 const BellIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
@@ -105,12 +114,12 @@ export default function Topbar() {
 
   let title, eyebrow;
   if (pathname === '/pantry') {
-    title   = 'Pantry';
+    title   = 'Larder';
     eyebrow = pantry.length
       ? `${pantry.length} item${pantry.length !== 1 ? 's' : ''} tracked`
       : 'Your ingredient stock';
   } else if (pathname === '/recipes') {
-    title   = 'Recipes';
+    title   = 'Scrolls';
     eyebrow = recipes.length ? `${recipes.length} saved` : 'Your recipe collection';
   } else {
     const cfg = STATIC_CONFIG[pathname] ?? { title: "Hestia's Hearth", eyebrow: '' };
@@ -253,7 +262,11 @@ export default function Topbar() {
     <header className="topbar">
       <div className="topbar-titles">
         {eyebrow && <span className="topbar-eyebrow">{eyebrow}</span>}
-        <span className="topbar-title">{title}</span>
+        <span className="topbar-title">
+          <LaurelSprig />
+          {title}
+          <LaurelSprig className="laurel-sprig-r" />
+        </span>
       </div>
 
       <div className="search topbar-desktop">

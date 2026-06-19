@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState, expiryStatus, expiryLabel } from '../context/AppState';
 import { useAuth } from '../context/AuthContext';
+import MeanderDivider from '../components/MeanderDivider';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner'];
 const MEAL_PILL = { Breakfast: 'meal-pill-breakfast', Lunch: 'meal-pill-lunch', Dinner: 'meal-pill-dinner' };
@@ -58,9 +59,11 @@ export default function Home() {
     .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
     .toUpperCase();
 
+  const hasLibrary = recipes.length > 0 || expiring.length > 0;
+
   return (
     <>
-      {/* ── Hero ── */}
+      {/* ── Zone 1: Hero ── */}
       <div className="home-hero">
         <div className="hero-left">
           <div className="hero-greeting">{dateLabel} · {getGreeting()}</div>
@@ -83,10 +86,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Body grid ── */}
-      <div className="home-grid">
+      <MeanderDivider />
 
-        {/* Left column */}
+      {/* ── Zone 2: Today ── */}
+      <div className="home-grid">
         <div>
           <div className="section-head">
             <span className="section-title">Today's meals</span>
@@ -120,37 +123,10 @@ export default function Home() {
               );
             })}
           </div>
-
-          {recipes.length > 0 && (
-            <>
-              <div className="section-head">
-                <span className="section-title">Saved recipes</span>
-                <button className="section-link" onClick={() => navigate('/recipes')}>View all →</button>
-              </div>
-              <div className="recipe-rail">
-                {recipes.slice(0, 8).map(r => (
-                  <div key={r.id} className="recipe-rail-card" onClick={() => navigate('/recipes')}>
-                    <div className="rrc-img">
-                      <span>{r.emoji || '🍽️'}</span>
-                    </div>
-                    <div className="rrc-body">
-                      <div className="rrc-name">{r.title}</div>
-                      <div className="rrc-meta">
-                        {r.time ? `⏱ ${r.time} min` : ''}
-                        {r.kcal ? ` · 🔥 ${r.kcal} kcal` : ''}
-                        {!r.time && !r.kcal ? (r.ingredients || []).slice(0, 2).join(', ') : ''}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
         </div>
 
-        {/* Right column */}
         <div>
-          <div className="section-head" style={{ marginTop: 0 }}>
+          <div className="section-head">
             <span className="section-title">Quick actions</span>
           </div>
           <div className="qa-grid">
@@ -164,31 +140,64 @@ export default function Home() {
               </button>
             ))}
           </div>
-
-          {expiring.length > 0 && (
-            <>
-              <div className="section-head">
-                <span className="section-title">Use it soon</span>
-                <button className="section-link" onClick={() => navigate('/pantry')}>Pantry →</button>
-              </div>
-              <div className="card">
-                {expiring.map((item, i) => (
-                  <div
-                    key={item.name}
-                    className="alert-row"
-                    style={i === expiring.length - 1 ? { borderBottom: 'none' } : {}}
-                  >
-                    <div className="alert-icon">{item.emoji || '📦'}</div>
-                    <span className="alert-name">{item.name}</span>
-                    <span className={`expiry-badge ${expiryStatus(item.expiry)}`}>{expiryLabel(item.expiry)}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
         </div>
-
       </div>
+
+      {/* ── Zone 3: Library ── */}
+      {hasLibrary && (
+        <>
+          <MeanderDivider />
+          <div className="home-library">
+            {recipes.length > 0 && (
+              <>
+                <div className="section-head">
+                  <span className="section-title">Saved recipes</span>
+                  <button className="section-link" onClick={() => navigate('/recipes')}>View all →</button>
+                </div>
+                <div className="recipe-rail">
+                  {recipes.slice(0, 8).map(r => (
+                    <div key={r.id} className="recipe-rail-card" onClick={() => navigate('/recipes')}>
+                      <div className="rrc-img">
+                        <span>{r.emoji || '🍽️'}</span>
+                      </div>
+                      <div className="rrc-body">
+                        <div className="rrc-name">{r.title}</div>
+                        <div className="rrc-meta">
+                          {r.time ? `⏱ ${r.time} min` : ''}
+                          {r.kcal ? ` · 🔥 ${r.kcal} kcal` : ''}
+                          {!r.time && !r.kcal ? (r.ingredients || []).slice(0, 2).join(', ') : ''}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {expiring.length > 0 && (
+              <>
+                <div className="section-head">
+                  <span className="section-title">Use it soon</span>
+                  <button className="section-link" onClick={() => navigate('/pantry')}>Pantry →</button>
+                </div>
+                <div className="card">
+                  {expiring.map((item, i) => (
+                    <div
+                      key={item.name}
+                      className="alert-row"
+                      style={i === expiring.length - 1 ? { borderBottom: 'none' } : {}}
+                    >
+                      <div className="alert-icon">{item.emoji || '📦'}</div>
+                      <span className="alert-name">{item.name}</span>
+                      <span className={`expiry-badge ${expiryStatus(item.expiry)}`}>{expiryLabel(item.expiry)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
     </>
   );
 }
