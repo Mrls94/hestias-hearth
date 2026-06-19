@@ -7,7 +7,9 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [authState, setAuthState] = useState('loading'); // loading | authenticated | unauthenticated | confirming
   const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingName, setPendingName] = useState('');
 
   useEffect(() => {
     const user = pool.getCurrentUser();
@@ -15,6 +17,7 @@ export function AuthProvider({ children }) {
     user.getSession((err, session) => {
       if (!err && session?.isValid()) {
         setUserEmail(user.getUsername());
+        setUserName(session.getIdToken().decodePayload().name || '');
         setAuthState('authenticated');
       } else {
         setAuthState('unauthenticated');
@@ -27,17 +30,26 @@ export function AuthProvider({ children }) {
     user.authenticateUser(
       new AuthenticationDetails({ Username: email, Password: password }),
       {
-        onSuccess: () => { setUserEmail(email); setAuthState('authenticated'); resolve(); },
+        onSuccess: (session) => {
+          setUserEmail(email);
+          setUserName(session.getIdToken().decodePayload().name || '');
+          setAuthState('authenticated');
+          resolve();
+        },
         onFailure: reject,
       }
     );
   });
 
-  const signUp = (email, password) => new Promise((resolve, reject) => {
-    const attrs = [new CognitoUserAttribute({ Name: 'email', Value: email })];
+  const signUp = (email, password, name) => new Promise((resolve, reject) => {
+    const attrs = [
+      new CognitoUserAttribute({ Name: 'email', Value: email }),
+      new CognitoUserAttribute({ Name: 'name', Value: name }),
+    ];
     pool.signUp(email, password, attrs, null, (err, result) => {
       if (err) return reject(err);
       setPendingEmail(email);
+      setPendingName(name);
       setAuthState('confirming');
       resolve(result);
     });
@@ -47,6 +59,7 @@ export function AuthProvider({ children }) {
     const user = new CognitoUser({ Username: pendingEmail, Pool: pool });
     user.confirmRegistration(code, true, (err) => {
       if (err) return reject(err);
+      setUserName(pendingName);
       setAuthState('unauthenticated'); // confirmed — now sign in
       resolve();
     });
@@ -72,11 +85,12 @@ export function AuthProvider({ children }) {
   const signOut = () => {
     pool.getCurrentUser()?.signOut();
     setUserEmail('');
+    setUserName('');
     setAuthState('unauthenticated');
   };
 
   return (
-    <AuthContext.Provider value={{ authState, userEmail, pendingEmail, signIn, signUp, confirmSignUp, forgotPassword, confirmForgotPassword, signOut }}>
+    <AuthContext.Provider value={{ authState, userEmail, userName, pendingEmail, signIn, signUp, confirmSignUp, forgotPassword, confirmForgotPassword, signOut }}>
       {children}
     </AuthContext.Provider>
   );

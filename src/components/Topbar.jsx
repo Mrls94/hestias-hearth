@@ -71,6 +71,20 @@ export default function Topbar() {
     eyebrow = cfg.eyebrow;
   }
 
+  const avatarBtn = (
+    <div style={{ position: 'relative' }}>
+      <button className="avatar-btn" onClick={() => setShowSignOut(v => !v)}>{userInitial}</button>
+      {showSignOut && (
+        <div style={{ position: 'absolute', right: 0, top: '110%', background: 'var(--surface)', border: '1px solid var(--stone-light)', borderRadius: 8, padding: '4px 0', zIndex: 100, minWidth: 120, boxShadow: '0 4px 12px rgba(0,0,0,.1)' }}>
+          <button onClick={() => { setShowSignOut(false); signOut(); }}
+            style={{ width: '100%', padding: '8px 16px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--charcoal)' }}>
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   // Route-specific mobile trailing buttons
   let mobileTrailing;
   if (pathname === '/') {
@@ -80,46 +94,41 @@ export default function Topbar() {
           <BellIcon />
           <span className="dot" aria-hidden="true" />
         </button>
-        <div style={{ position: 'relative' }}>
-          <button className="avatar-btn" onClick={() => setShowSignOut(v => !v)}>{userInitial}</button>
-          {showSignOut && (
-            <div style={{ position: 'absolute', right: 0, top: '110%', background: 'var(--surface)', border: '1px solid var(--stone-light)', borderRadius: 8, padding: '4px 0', zIndex: 100, minWidth: 120, boxShadow: '0 4px 12px rgba(0,0,0,.1)' }}>
-              <button onClick={() => { setShowSignOut(false); signOut(); }}
-                style={{ width: '100%', padding: '8px 16px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--charcoal)' }}>
-                Sign out
-              </button>
-            </div>
-          )}
-        </div>
+        {avatarBtn}
       </>
     );
   } else if (pathname === '/shopping') {
     mobileTrailing = (
-      <button className="round-btn" aria-label="Notifications">
-        <BellIcon />
-        <span className="dot" aria-hidden="true" />
-      </button>
+      <>
+        <button className="round-btn" aria-label="Notifications">
+          <BellIcon />
+          <span className="dot" aria-hidden="true" />
+        </button>
+        {avatarBtn}
+      </>
     );
   } else if (pathname === '/recipes') {
     mobileTrailing = (
-      <button className="round-btn" aria-label="Add recipe"
-        onClick={() => scrollToEl('#new-recipe-form')}>
-        <PlusIcon />
-      </button>
+      <>
+        <button className="round-btn" aria-label="Add recipe"
+          onClick={() => scrollToEl('#new-recipe-form')}>
+          <PlusIcon />
+        </button>
+        {avatarBtn}
+      </>
     );
   } else if (pathname === '/pantry') {
     mobileTrailing = (
-      <button className="round-btn" aria-label="Add item"
-        onClick={() => scrollToEl('.pantry-add-form')}>
-        <PlusIcon />
-      </button>
+      <>
+        <button className="round-btn" aria-label="Add item"
+          onClick={() => scrollToEl('.pantry-add-form')}>
+          <PlusIcon />
+        </button>
+        {avatarBtn}
+      </>
     );
   } else {
-    mobileTrailing = (
-      <button className="round-btn" aria-label="Add">
-        <PlusIcon />
-      </button>
-    );
+    mobileTrailing = avatarBtn;
   }
 
   return (

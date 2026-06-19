@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState, expiryStatus, expiryLabel } from '../context/AppState';
+import { useAuth } from '../context/AuthContext';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner'];
 const MEAL_PILL = { Breakfast: 'meal-pill-breakfast', Lunch: 'meal-pill-lunch', Dinner: 'meal-pill-dinner' };
@@ -40,6 +41,7 @@ function weekPlanned(mealPlanner) {
 
 export default function Home() {
   const { recipes, mealPlanner, pantry } = useAppState();
+  const { userName } = useAuth();
   const expiring = pantry.filter(i => ['soon', 'exp'].includes(expiryStatus(i.expiry))).slice(0, 3);
   const navigate = useNavigate();
   const key = todayKey();
@@ -62,7 +64,7 @@ export default function Home() {
       <div className="home-hero">
         <div className="hero-left">
           <div className="hero-greeting">{dateLabel} · {getGreeting()}</div>
-          <h1 className="hero-title">Welcome back, <em>friend</em>!</h1>
+          <h1 className="hero-title">Welcome back, <em>{userName || 'friend'}</em>!</h1>
           <p className="hero-sub">Simple recipe manager — add recipes, generate shopping lists, and plan meals.</p>
         </div>
         <div className="hero-stats">

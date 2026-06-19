@@ -6,6 +6,7 @@ export default function Login() {
   const [mode, setMode] = useState('signin'); // signin | signup | forgot | reset
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -169,9 +170,19 @@ export default function Login() {
           onKeyDown={e => {
             if (e.key !== 'Enter') return;
             if (mode === 'signin') handle(() => signIn(email, password));
-            else handle(() => signUp(email, password));
+            else handle(() => signUp(email, password, name));
           }}
         />
+        {mode === 'signup' && (
+          <input
+            className="login-input"
+            type="text"
+            placeholder="Your name"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handle(() => signUp(email, password, name))}
+          />
+        )}
 
         {error && <p className="login-error">{error}</p>}
 
@@ -180,7 +191,7 @@ export default function Login() {
           disabled={busy}
           onClick={() => {
             if (mode === 'signin') handle(() => signIn(email, password));
-            else handle(() => signUp(email, password));
+            else handle(() => signUp(email, password, name));
           }}
         >
           {busy
