@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../context/AppState';
+import RecipeDetail from '../components/RecipeDetail';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 const MEAL_ICONS = { Breakfast: '🌅', Lunch: '☀️', Dinner: '🌙', Snacks: '🍎' };
@@ -37,6 +38,7 @@ export default function Planner() {
   const [offset, setOffset]       = useState(0);
   const [assigning, setAssigning] = useState(null); // { key, meal }
   const [activeDay, setActiveDay] = useState(() => (new Date().getDay() + 6) % 7);
+  const [viewingRecipe, setViewingRecipe] = useState(null);
 
   const dates = getWeekDates(offset);
   const getRecipe = id => id ? recipes.find(r => r.id === id || r.id === Number(id)) : null;
@@ -61,6 +63,11 @@ export default function Planner() {
   const activeDayKcal = MEAL_TYPES
     .map(t => getRecipe(activeDayPlan[t])?.kcal || 0)
     .reduce((a, b) => a + b, 0);
+
+  if (viewingRecipe) {
+    const live = recipes.find(r => r.id === viewingRecipe.id) ?? viewingRecipe;
+    return <RecipeDetail recipe={live} onBack={() => setViewingRecipe(null)} backLabel="Back to Planner" />;
+  }
 
   return (
     <>
@@ -112,10 +119,16 @@ export default function Planner() {
                 return (
                   <div key={i} className={`pg-cell${isToday(d) ? ' today-col' : ''}`}>
                     {recipe ? (
-                      <div className="pg-meal" title={recipe.title}>
-                        <span className="pg-meal-emoji">{recipe.emoji || '🍽️'}</span>
-                        <span className="pg-meal-name">{recipe.title}</span>
-                        {recipe.kcal && <span className="pg-meal-kcal">{recipe.kcal} kcal</span>}
+                      <div className="pg-meal">
+                        <button
+                          className="pg-meal-info"
+                          onClick={() => setViewingRecipe(recipe)}
+                          title={`View ${recipe.title}`}
+                        >
+                          <span className="pg-meal-emoji">{recipe.emoji || '🍽️'}</span>
+                          <span className="pg-meal-name">{recipe.title}</span>
+                          {recipe.kcal && <span className="pg-meal-kcal">{recipe.kcal} kcal</span>}
+                        </button>
                         <button
                           className="pg-meal-clear"
                           onClick={() => clearMeal(key, meal)}
@@ -202,11 +215,13 @@ export default function Planner() {
               </div>
               {recipe ? (
                 <div className="plan-meal-card">
-                  <div className="pm-emoji">{recipe.emoji || '🍽️'}</div>
-                  <div className="pm-info">
-                    <div className="pm-name">{recipe.title}</div>
-                    {recipe.kcal && <div className="pm-kcal">{recipe.kcal} kcal</div>}
-                  </div>
+                  <button className="pm-info" onClick={() => setViewingRecipe(recipe)}>
+                    <div className="pm-emoji">{recipe.emoji || '🍽️'}</div>
+                    <div className="pm-info-text">
+                      <div className="pm-name">{recipe.title}</div>
+                      {recipe.kcal && <div className="pm-kcal">{recipe.kcal} kcal</div>}
+                    </div>
+                  </button>
                   <button className="pm-clear" onClick={() => clearMeal(activeDateKey, mealType)}>×</button>
                 </div>
               ) : editing ? (
