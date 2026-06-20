@@ -743,7 +743,14 @@
 
 .rd-footer {
   margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--stone-light);
+  display: flex; gap: 10px; flex-wrap: wrap;
 }
+.rd-edit {
+  font-size: 13px; font-weight: 500; color: var(--charcoal); background: none;
+  border: 1px solid var(--stone-light); border-radius: 10px; cursor: pointer;
+  padding: 9px 18px; font-family: 'DM Sans', sans-serif; transition: all .15s;
+}
+.rd-edit:hover { color: var(--sage); border-color: var(--sage); background: #f0f5f0; }
 .rd-delete {
   font-size: 13px; font-weight: 500; color: var(--stone); background: none;
   border: 1px solid var(--stone-light); border-radius: 10px; cursor: pointer;
@@ -1125,6 +1132,11 @@
 .rc-step { display: flex; gap: 13px; align-items: flex-start; margin-bottom: 12px; }
 .rc-step-num { width: 34px; height: 34px; border-radius: 50%; background: var(--ochre-light); color: var(--charcoal); font-family: 'Lora', serif; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 3px; }
 .rc-step .rc-textarea { min-height: 52px; }
+.rc-step-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+.rc-arrow { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--stone-light); background: var(--surface); color: var(--stone); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.13s; }
+.rc-arrow:hover:not(:disabled) { border-color: var(--terracotta); color: var(--terracotta); background: var(--terracotta-light); }
+.rc-arrow:disabled { opacity: 0.25; cursor: default; }
+.rc-arrow svg { width: 14px; height: 14px; }
 
 .rc-num-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .rc-num-wrap { position: relative; }

@@ -14,7 +14,7 @@ const DIFF_BADGE = {
   Divine: { bg: 'var(--terracotta-light)', color: 'var(--terracotta-dark)', border: '#d4917a' },
 };
 
-function RecipeDetail({ recipe: r, onBack, onDelete }) {
+function RecipeDetail({ recipe: r, onBack, onDelete, onEdit }) {
   const [checked, setChecked] = React.useState({});
   const [doneStes, setDoneSteps] = React.useState({});
 
@@ -137,14 +137,16 @@ function RecipeDetail({ recipe: r, onBack, onDelete }) {
             </div>
 
             <div className="rd-footer">
+              <button className="rd-edit" onClick={() => onEdit(r)}>Edit recipe</button>
               <button className="rd-delete" onClick={() => onDelete(r.id)}>Delete recipe</button>
             </div>
           </div>
         )}
 
-        {/* If no steps, show delete below ingredients */}
+        {/* If no steps, show buttons below ingredients */}
         {steps.length === 0 && (
           <div className="rd-footer" style={{ gridColumn: '1 / -1' }}>
+            <button className="rd-edit" onClick={() => onEdit(r)}>Edit recipe</button>
             <button className="rd-delete" onClick={() => onDelete(r.id)}>Delete recipe</button>
           </div>
         )}
@@ -175,6 +177,7 @@ export default function Recipes() {
   const { recipes, addRecipe, deleteRecipe, updateRecipe } = useAppState();
   const [activeChip, setActiveChip] = useState(null);
   const [showCreator, setShowCreator] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
@@ -201,6 +204,10 @@ export default function Recipes() {
     return <RecipeCreator onClose={() => setShowCreator(false)} />;
   }
 
+  if (editingRecipe) {
+    return <RecipeCreator recipe={editingRecipe} onClose={() => setEditingRecipe(null)} />;
+  }
+
   if (selectedRecipe) {
     const live = recipes.find(r => r.id === selectedRecipe.id) ?? selectedRecipe;
     return (
@@ -208,6 +215,7 @@ export default function Recipes() {
         recipe={live}
         onBack={() => setSelectedRecipe(null)}
         onDelete={(id) => { deleteRecipe(id); setSelectedRecipe(null); }}
+        onEdit={(r) => setEditingRecipe(r)}
       />
     );
   }

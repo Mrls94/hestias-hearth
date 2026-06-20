@@ -35,7 +35,23 @@ const TOASTS = {
 
 const DIFF_CLASS = { Mortal: 'rc-diff-mortal', Heroic: 'rc-diff-heroic', Divine: 'rc-diff-divine' };
 
-function initForm() {
+function initForm(recipe = null) {
+  if (recipe) {
+    const steps = Array.isArray(recipe.steps)
+      ? recipe.steps
+      : (recipe.steps || '').split('\n').map(s => s.replace(/^[-*]\s*/, '').trim()).filter(Boolean);
+    return {
+      name: recipe.title || '',
+      glyph: recipe.emoji || '🍲',
+      ingredients: [...(recipe.ingredients || []), { qty: '', name: '' }],
+      steps: [...steps, ''],
+      time: recipe.time ? String(recipe.time) : '',
+      calories: recipe.kcal ? String(recipe.kcal) : '',
+      category: recipe.category || 'Breakfast',
+      difficulty: recipe.difficulty || 'Mortal',
+      toast: null,
+    };
+  }
   return {
     name: '',
     glyph: '🍲',
@@ -64,6 +80,18 @@ const XIcon = () => (
   </svg>
 );
 
+const ChevronUpIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+);
+
+const ChevronDownIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9"/>
+  </svg>
+);
+
 const SaveIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
@@ -72,9 +100,9 @@ const SaveIcon = () => (
   </svg>
 );
 
-export default function RecipeCreator({ onClose }) {
-  const { addRecipe } = useAppState();
-  const [form, setForm] = useState(initForm);
+export default function RecipeCreator({ onClose, recipe = null }) {
+  const { addRecipe, updateRecipe } = useAppState();
+  const [form, setForm] = useState(() => initForm(recipe));
   const nameRef = useRef(null);
   const toastTimer = useRef(null);
 
@@ -122,6 +150,13 @@ export default function RecipeCreator({ onClose }) {
   };
   const addStep = () => patch({ steps: [...steps, ''] });
   const removeStep = (i) => patch({ steps: steps.filter((_, idx) => idx !== i) });
+  const moveStep = (i, dir) => {
+    const next = [...steps];
+    const j = i + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[i], next[j]] = [next[j], next[i]];
+    patch({ steps: next });
+  };
 
   // ── Save ────────────────────────────────────────
   function handleSave() {
@@ -130,8 +165,7 @@ export default function RecipeCreator({ onClose }) {
       nameRef.current?.focus();
       return;
     }
-    addRecipe({
-      id: Date.now(),
+    const data = {
       title: name.trim(),
       emoji: glyph,
       ingredients: ingredients.filter(i => i.name.trim()),
@@ -140,7 +174,12 @@ export default function RecipeCreator({ onClose }) {
       kcal: parseInt(calories) || 450,
       category,
       difficulty,
-    });
+    };
+    if (recipe) {
+      updateRecipe(recipe.id, data);
+    } else {
+      addRecipe({ id: Date.now(), ...data });
+    }
     showToast('🔥', TOASTS[difficulty]);
     setTimeout(onClose, 1600);
   }
@@ -158,7 +197,7 @@ export default function RecipeCreator({ onClose }) {
           </svg>
           Back
         </button>
-        <span style={{ fontFamily: 'Lora,serif', fontWeight: 600, fontSize: 16, color: 'var(--charcoal)' }}>New Recipe</span>
+        <span style={{ fontFamily: 'Lora,serif', fontWeight: 600, fontSize: 16, color: 'var(--charcoal)' }}>{recipe ? 'Edit Recipe' : 'New Recipe'}</span>
       </div>
 
       <div className="rc-overlay-scroll">
@@ -167,8 +206,8 @@ export default function RecipeCreator({ onClose }) {
         <div className="rc-hero">
           <div className="rc-hero-left">
             <div className="rc-hero-eyebrow">Hestia's Hearth · Recipe Creator</div>
-            <div className="rc-hero-title">Craft a new <em>legend</em></div>
-            <div className="rc-hero-sub">Every great feast begins with a single step. Fill in the details below and let the hearth do the rest.</div>
+            <div className="rc-hero-title">{recipe ? <>Refine your <em>legend</em></> : <>Craft a new <em>legend</em></>}</div>
+            <div className="rc-hero-sub">{recipe ? 'Adjust the details below — the hearth remembers every change.' : 'Every great feast begins with a single step. Fill in the details below and let the hearth do the rest.'}</div>
           </div>
           <div className="rc-hero-glyph">{glyph}</div>
         </div>
@@ -219,6 +258,20 @@ export default function RecipeCreator({ onClose }) {
                 <span className="rc-card-hint">qty + name</span>
               </div>
 
+              <p className="rc-pantry-label">Quick-add pantry staples:</p>
+              <div className="rc-quick-chips" style={{ marginBottom: 20 }}>
+                {QUICK_CHIPS.map(chip => (
+                  <button
+                    key={chip.name}
+                    type="button"
+                    className={`rc-quick-chip${isChipUsed(chip) ? ' used' : ''}`}
+                    onClick={() => addChip(chip)}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="rc-ing-head">
                 <span className="rc-label" style={{ margin: 0 }}>Qty</span>
                 <span className="rc-label" style={{ margin: 0 }}>Ingredient</span>
@@ -254,20 +307,6 @@ export default function RecipeCreator({ onClose }) {
                 <PlusIcon />
                 Add ingredient
               </button>
-
-              <p className="rc-pantry-label">Quick-add pantry staples:</p>
-              <div className="rc-quick-chips">
-                {QUICK_CHIPS.map(chip => (
-                  <button
-                    key={chip.name}
-                    type="button"
-                    className={`rc-quick-chip${isChipUsed(chip) ? ' used' : ''}`}
-                    onClick={() => addChip(chip)}
-                  >
-                    {chip.label}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Card 3: Steps */}
@@ -288,15 +327,17 @@ export default function RecipeCreator({ onClose }) {
                     rows={2}
                     onChange={e => setStep(i, e.target.value)}
                   />
-                  <button
-                    type="button"
-                    className="rc-remove"
-                    aria-label="Remove step"
-                    onClick={() => removeStep(i)}
-                    style={{ marginTop: 3 }}
-                  >
-                    <XIcon />
-                  </button>
+                  <div className="rc-step-actions">
+                    <button type="button" className="rc-arrow" aria-label="Move step up" disabled={i === 0} onClick={() => moveStep(i, -1)}>
+                      <ChevronUpIcon />
+                    </button>
+                    <button type="button" className="rc-arrow" aria-label="Move step down" disabled={i === steps.length - 1} onClick={() => moveStep(i, 1)}>
+                      <ChevronDownIcon />
+                    </button>
+                    <button type="button" className="rc-remove" aria-label="Remove step" onClick={() => removeStep(i)}>
+                      <XIcon />
+                    </button>
+                  </div>
                 </div>
               ))}
 
@@ -430,7 +471,7 @@ export default function RecipeCreator({ onClose }) {
               <div className="rc-save-card">
                 <button type="button" className="btn-primary" onClick={handleSave}>
                   <SaveIcon />
-                  Save recipe
+                  {recipe ? 'Save changes' : 'Save recipe'}
                 </button>
                 <button
                   type="button"
@@ -456,7 +497,7 @@ export default function RecipeCreator({ onClose }) {
       <div className="rc-overlay-savebar">
         <button type="button" className="btn-primary" onClick={handleSave}>
           <SaveIcon />
-          Save recipe
+          {recipe ? 'Save changes' : 'Save recipe'}
         </button>
       </div>
 
