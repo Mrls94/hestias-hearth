@@ -8,11 +8,11 @@ const ShoppingIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentC
 const PantryIcon   = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>;
 
 const TABS = [
-  { to: '/',         label: 'Hearth',  Icon: HomeIcon,     end: true },
-  { to: '/planner',  label: 'Oracle',  Icon: PlannerIcon },
-  { to: '/recipes',  label: 'Scrolls', Icon: RecipesIcon },
-  { to: '/shopping', label: 'Agora',   Icon: ShoppingIcon },
-  { to: '/pantry',   label: 'Larder',  Icon: PantryIcon },
+  { to: '/',         label: 'Hearth',   Icon: HomeIcon,     end: true },
+  { to: '/planner',  label: 'Planner',  Icon: PlannerIcon },
+  { to: '/recipes',  label: 'Recipes',  Icon: RecipesIcon },
+  { to: '/shopping', label: 'Shopping', Icon: ShoppingIcon },
+  { to: '/pantry',   label: 'Pantry',   Icon: PantryIcon },
 ];
 
 export default function BottomNav() {

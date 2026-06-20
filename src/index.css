@@ -108,7 +108,7 @@ h1, h2, h3, h4 {
   box-shadow: 0 4px 32px rgba(44,40,36,.08);
 }
 
-.login-flame { font-size: 36px; text-align: center; }
+.login-flame { display: flex; justify-content: center; margin-bottom: 4px; }
 .login-title { font-family: 'Lora', serif; font-size: 24px; font-weight: 600; color: var(--ink); text-align: center; margin: 0; }
 .login-sub   { font-size: 14px; color: var(--stone); text-align: center; margin: 0 0 4px; }
 
@@ -171,7 +171,7 @@ h1, h2, h3, h4 {
   background: var(--cream);
 }
 
-.loading-flame { font-size: 40px; animation: pulse 1.4s ease-in-out infinite; }
+.loading-flame { display: flex; justify-content: center; }
 
 @keyframes pulse {
   0%, 100% { transform: scale(1);    opacity: 1; }

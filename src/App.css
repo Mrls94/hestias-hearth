@@ -26,43 +26,39 @@
   padding: 4px 8px 22px;
 }
 
-@keyframes flame-flicker {
-  0%   { transform: rotate(-45deg) scale(1); }
-  20%  { transform: rotate(-48deg) scale(1.05); }
-  45%  { transform: rotate(-42deg) scale(0.96); }
-  70%  { transform: rotate(-47deg) scale(1.03); }
-  100% { transform: rotate(-45deg) scale(1); }
+@keyframes flame-breathe {
+  0%   { transform: scaleX(1)    scaleY(1); }
+  30%  { transform: scaleX(0.93) scaleY(1.04); }
+  65%  { transform: scaleX(1.04) scaleY(0.97); }
+  100% { transform: scaleX(1)    scaleY(1); }
 }
 
 @keyframes flame-glow {
-  0%   { opacity: 0.75; transform: scale(1); }
-  35%  { opacity: 1;    transform: scale(1.12); }
-  65%  { opacity: 0.65; transform: scale(0.88); }
-  100% { opacity: 0.75; transform: scale(1); }
+  0%   { opacity: 0.82; }
+  50%  { opacity: 1; }
+  100% { opacity: 0.82; }
 }
 
-.logo-flame {
-  width: 36px;
-  height: 36px;
-  background: var(--terracotta);
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
-  position: relative;
+.flame-icon {
+  overflow: visible;
   flex-shrink: 0;
-  animation: flame-flicker 2.6s ease-in-out infinite;
-  transform-origin: center center;
+  filter: drop-shadow(0 2px 7px rgba(196, 96, 58, 0.38));
+  animation: flame-breathe 2.8s ease-in-out infinite;
+  transform-origin: 50% 100%;
 }
 
-.logo-flame::after {
-  content: '';
-  position: absolute;
-  width: 17px;
-  height: 17px;
-  background: var(--ochre-light);
-  border-radius: 50%;
-  top: 7px;
-  left: 5px;
-  animation: flame-glow 1.9s ease-in-out infinite;
+.flame-icon .flame-mid {
+  animation: flame-glow 2s ease-in-out infinite;
+}
+
+.flame-icon .flame-core {
+  animation: flame-glow 1.5s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flame-icon,
+  .flame-icon .flame-mid,
+  .flame-icon .flame-core { animation: none; }
 }
 
 .brand-text {

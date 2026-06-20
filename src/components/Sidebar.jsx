@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAppState } from '../context/AppState';
 import { useAuth } from '../context/AuthContext';
+import FlameIcon from './FlameIcon';
 
 function getWeekDates() {
   const today = new Date();
@@ -124,7 +125,7 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="logo-flame" aria-hidden="true" />
+        <FlameIcon width={26} height={37} />
         <div className="brand-text">
           Hestia's
           <span>Hearth</span>
@@ -132,11 +133,11 @@ export default function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        <NavItem to="/"         icon={<IcoHome />}     label="Hearth"   end />
-        <NavItem to="/planner"  icon={<IcoCalendar />} label="Oracle" />
-        <NavItem to="/recipes"  icon={<IcoBook />}     label="Scrolls"  count={recipes.length || null} />
-        <NavItem to="/shopping" icon={<IcoCart />}     label="Agora"    count={shoppingCount || null} />
-        <NavItem to="/pantry"   icon={<IcoBox />}      label="Larder" />
+        <NavItem to="/"         icon={<IcoHome />}     label="Hearth"    end />
+        <NavItem to="/planner"  icon={<IcoCalendar />} label="Planner" />
+        <NavItem to="/recipes"  icon={<IcoBook />}     label="Recipes"   count={recipes.length || null} />
+        <NavItem to="/shopping" icon={<IcoCart />}     label="Shopping"  count={shoppingCount || null} />
+        <NavItem to="/pantry"   icon={<IcoBox />}      label="Pantry" />
       </nav>
 
       <div className="sidebar-spacer" />

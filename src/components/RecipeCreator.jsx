@@ -1,7 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppState } from '../context/AppState';
 
-const GLYPHS = ['🍲','🍝','🥘','🍛','🥗','🍜','🐟','🍕','🥙','🌯','🥞','🍳','🥩','🍤','🫕','🍰','🥧','🍯'];
+const GLYPHS = [
+  // Stews, soups & bowls
+  '🍲','🥘','🍛','🍜','🫕','🍱',
+  // Pasta & rice
+  '🍝','🍚','🍙',
+  // Eggs & breakfast
+  '🍳','🧇','🥞','🥚',
+  // Meat & poultry
+  '🥩','🍖','🍗','🥓',
+  // Seafood
+  '🐟','🍤','🦞','🦀','🦑','🦐',
+  // Pizza, wraps & sandwiches
+  '🍕','🌮','🫔','🥙','🌯','🥪','🫓','🍔','🌭','🍟',
+  // Sushi, dumplings & world dishes
+  '🍣','🥟','🧆','🍢','🍡',
+  // Breads & baked savory
+  '🥐','🍞','🥖','🥨',
+  // Salads & veg
+  '🥗','🥦','🌽','🍄',
+  // Desserts & sweets
+  '🍰','🥧','🎂','🧁','🍩','🍪','🍮','🍨','🍦','🍫','🍯',
+];
 
 const QUICK_CHIPS = [
   { label: '🫒 Olive oil',       qty: '2 tbsp',   name: 'Olive oil' },

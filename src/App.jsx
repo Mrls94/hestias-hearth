@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import FlameIcon from './components/FlameIcon';
 import { useAuth } from './context/AuthContext';
 import { useAppState } from './context/AppState';
 import Sidebar from './components/Sidebar';
@@ -18,7 +19,7 @@ import './App.css';
 function LoadingScreen() {
   return (
     <div className="loading-root">
-      <div className="loading-flame">🔥</div>
+      <div className="loading-flame"><FlameIcon width={44} height={63} /></div>
       <div className="loading-spinner" />
     </div>
   );

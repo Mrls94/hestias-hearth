@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import FlameIcon from '../components/FlameIcon';
 
 export default function Login() {
   const { authState, signIn, signUp, confirmSignUp, forgotPassword, confirmForgotPassword } = useAuth();
@@ -31,7 +32,7 @@ export default function Login() {
     return (
       <div className="login-root">
         <div className="login-card">
-          <div className="login-flame">🔥</div>
+          <div className="login-flame"><FlameIcon width={38} height={54} /></div>
           <h1 className="login-title">Check your email</h1>
           <p className="login-sub">We sent a verification code to your inbox.</p>
           <p className="login-sub" style={{ fontSize: 12, color: 'var(--stone)' }}>Can't find it? Check your spam folder.</p>
@@ -58,7 +59,7 @@ export default function Login() {
     return (
       <div className="login-root">
         <div className="login-card">
-          <div className="login-flame">🔥</div>
+          <div className="login-flame"><FlameIcon width={38} height={54} /></div>
           <h1 className="login-title">Reset password</h1>
           <p className="login-sub">Enter the code we sent to {email} and choose a new password.</p>
           <p className="login-sub" style={{ fontSize: 12, color: 'var(--stone)' }}>Can't find it? Check your spam folder.</p>
@@ -109,7 +110,7 @@ export default function Login() {
     return (
       <div className="login-root">
         <div className="login-card">
-          <div className="login-flame">🔥</div>
+          <div className="login-flame"><FlameIcon width={38} height={54} /></div>
           <h1 className="login-title">Forgot password?</h1>
           <p className="login-sub">Enter your email and we'll send a reset code.</p>
           <input
