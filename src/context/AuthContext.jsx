@@ -37,7 +37,16 @@ export function AuthProvider({ children }) {
           setAuthState('authenticated');
           resolve();
         },
-        onFailure: reject,
+        onFailure: (err) => {
+          if (err.code === 'UserNotConfirmedException') {
+            setPendingEmail(email);
+            setPendingPassword(password);
+            setAuthState('confirming');
+            resolve();
+          } else {
+            reject(err);
+          }
+        },
       }
     );
   });
