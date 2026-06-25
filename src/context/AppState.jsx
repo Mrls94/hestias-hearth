@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import * as api from '../api';
+import i18n from '../i18n';
 
 const AppStateContext = createContext(null);
 
@@ -35,11 +36,12 @@ export function expiryLabel(expiry) {
   if (!expiry) return null;
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const diff = Math.floor((new Date(expiry) - today) / 86400000);
-  if (diff < 0)   return 'Expired';
-  if (diff === 0)  return 'Today';
-  if (diff === 1)  return 'Tomorrow';
-  if (diff <= 7)   return `${diff}d left`;
-  return new Date(expiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (diff < 0)   return i18n.t('expiry.expired');
+  if (diff === 0)  return i18n.t('expiry.today');
+  if (diff === 1)  return i18n.t('expiry.tomorrow');
+  if (diff <= 7)   return i18n.t('expiry.days_left', { count: diff });
+  const locale = i18n.language === 'es' ? 'es-ES' : 'en-US';
+  return new Date(expiry).toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -72,11 +74,20 @@ export function AppStateProvider({ children }) {
   useEffect(() => {
     if (authState !== 'authenticated') return;
     setLoading(true);
-    api.getHousehold()
-      .then(info => {
+    Promise.all([
+      api.getHousehold(),
+      api.getRecipes(),
+      api.getPantry(),
+      api.getPlanner(),
+      api.getShopping(),
+    ])
+      .then(([info, r, p, pl, s]) => {
         setHouseholdInfo(info);
         setNeedsHousehold(false);
-        return fetchData();
+        setRecipes(r ?? []);
+        setPantry(p ?? []);
+        setMealPlanner(pl ?? {});
+        setShoppingList(s ?? []);
       })
       .catch(err => {
         if (err.status === 403) {

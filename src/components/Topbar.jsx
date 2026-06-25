@@ -2,18 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppState } from '../context/AppState';
 import { useAuth } from '../context/AuthContext';
-
-const dateLabel = new Date().toLocaleDateString('en-US', {
-  weekday: 'long', month: 'long', day: 'numeric',
-});
-
-const STATIC_CONFIG = {
-  '/':         { title: 'Hearth',  eyebrow: dateLabel },
-  '/recipes':  { title: 'Scrolls', eyebrow: 'Your recipe collection' },
-  '/planner':  { title: 'Oracle',  eyebrow: 'Meal & workout planner' },
-  '/shopping': { title: 'Agora',   eyebrow: 'This week · aisle-sorted' },
-  '/workouts': { title: 'Workouts', eyebrow: 'Scheduled sessions' },
-};
+import { useTranslation } from 'react-i18next';
 
 const LaurelSprig = ({ className = '' }) => (
   <svg className={`laurel-sprig ${className}`} viewBox="0 0 22 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -49,6 +38,9 @@ export default function Topbar() {
   const navigate = useNavigate();
   const { pantry, recipes, householdInfo, renameHousehold, switchHousehold } = useAppState();
   const { userEmail, signOut } = useAuth();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'es' ? 'es-ES' : 'en-US';
+  const toggleLang = () => i18n.changeLanguage(i18n.language === 'es' ? 'en' : 'es');
   const [showMenu, setShowMenu] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
@@ -94,7 +86,7 @@ export default function Topbar() {
       setJoinCode('');
       setShowMenu(false);
     } catch (err) {
-      setJoinErr(err.status === 404 ? 'Code not found.' : 'Could not join.');
+      setJoinErr(err.status === 404 ? t('topbar.code_not_found') : t('topbar.could_not_join'));
     } finally {
       setJoinBusy(false);
     }
@@ -112,19 +104,33 @@ export default function Topbar() {
     return () => mainEl.removeEventListener('scroll', handler);
   }, []);
 
+  const dateLabel = new Date().toLocaleDateString(locale, {
+    weekday: 'long', month: 'long', day: 'numeric',
+  });
+
   let title, eyebrow;
   if (pathname === '/pantry') {
-    title   = 'Larder';
+    title   = t('topbar.title_larder');
     eyebrow = pantry.length
-      ? `${pantry.length} item${pantry.length !== 1 ? 's' : ''} tracked`
-      : 'Your ingredient stock';
+      ? t('topbar.eyebrow_pantry_count', { count: pantry.length })
+      : t('topbar.eyebrow_pantry_empty');
   } else if (pathname === '/recipes') {
-    title   = 'Scrolls';
-    eyebrow = recipes.length ? `${recipes.length} saved` : 'Your recipe collection';
+    title   = t('topbar.title_scrolls');
+    eyebrow = recipes.length
+      ? t('topbar.eyebrow_recipes_count', { count: recipes.length })
+      : t('topbar.eyebrow_recipes');
+  } else if (pathname === '/planner') {
+    title   = t('topbar.title_oracle');
+    eyebrow = t('topbar.eyebrow_planner');
+  } else if (pathname === '/shopping') {
+    title   = t('topbar.title_agora');
+    eyebrow = t('topbar.eyebrow_shopping');
+  } else if (pathname === '/') {
+    title   = t('topbar.title_hearth');
+    eyebrow = dateLabel;
   } else {
-    const cfg = STATIC_CONFIG[pathname] ?? { title: "Hestia's Hearth", eyebrow: '' };
-    title   = cfg.title;
-    eyebrow = cfg.eyebrow;
+    title   = t('topbar.title_default');
+    eyebrow = '';
   }
 
   const avatarBtn = (
@@ -137,7 +143,7 @@ export default function Topbar() {
           {householdInfo && (
             <>
               <div style={{ padding: '4px 14px 8px' }}>
-                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--stone)', fontWeight: 600, marginBottom: 4 }}>Household</div>
+                <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--stone)', fontWeight: 600, marginBottom: 4 }}>{t('topbar.household_section')}</div>
                 {editingName ? (
                   <form onSubmit={handleRename} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                     <input
@@ -154,17 +160,17 @@ export default function Topbar() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <button
                       onClick={() => { setNameInput(householdInfo.name); setEditingName(true); }}
-                      title="Rename household"
+                      title={t('topbar.rename_household')}
                       style={{ flex: 1, background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 13.5, fontWeight: 600, color: 'var(--charcoal)', textAlign: 'left', fontFamily: 'DM Sans, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                     >
                       {householdInfo.name}
                     </button>
                     <button
                       onClick={copyInviteCode}
-                      title={copied ? 'Copied!' : `Invite code: ${householdInfo.inviteCode}`}
+                      title={copied ? '✓' : `${t('topbar.invite')}: ${householdInfo.inviteCode}`}
                       style={{ background: copied ? 'var(--sage-light)' : 'var(--cream)', border: '1px solid var(--stone-light)', borderRadius: 6, padding: '3px 7px', cursor: 'pointer', fontSize: 11, fontWeight: 600, color: copied ? 'var(--sage-dark)' : 'var(--stone)', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all .15s' }}
                     >
-                      {copied ? '✓' : 'Invite'}
+                      {copied ? t('topbar.copied') : t('topbar.invite')}
                     </button>
                   </div>
                 )}
@@ -176,17 +182,17 @@ export default function Topbar() {
                     autoFocus
                     value={joinCode}
                     onChange={e => { setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')); setJoinErr(''); }}
-                    placeholder="Invite code"
+                    placeholder={t('topbar.invite_code_placeholder')}
                     maxLength={8}
                     style={{ padding: '7px 10px', border: '1.5px solid var(--stone-light)', borderRadius: 8, fontSize: 13, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.08em', outline: 'none', background: 'var(--warm-white)', color: 'var(--charcoal)', textTransform: 'uppercase' }}
                   />
                   {joinErr && <div style={{ fontSize: 11.5, color: '#c0392b' }}>{joinErr}</div>}
                   <div style={{ display: 'flex', gap: 5 }}>
                     <button type="submit" disabled={joinBusy || joinCode.length < 4} style={{ flex: 1, padding: '6px 0', background: 'var(--terracotta)', color: '#fff', border: 'none', borderRadius: 7, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', opacity: (joinBusy || joinCode.length < 4) ? 0.55 : 1 }}>
-                      {joinBusy ? '…' : 'Join'}
+                      {joinBusy ? t('topbar.joining') : t('topbar.join')}
                     </button>
                     <button type="button" onClick={() => { setJoining(false); setJoinCode(''); setJoinErr(''); }} style={{ padding: '6px 10px', background: 'none', border: '1px solid var(--stone-light)', borderRadius: 7, fontSize: 12.5, color: 'var(--stone)', cursor: 'pointer' }}>
-                      Cancel
+                      {t('topbar.cancel')}
                     </button>
                   </div>
                 </form>
@@ -195,7 +201,7 @@ export default function Topbar() {
                   onClick={() => setJoining(true)}
                   style={{ width: '100%', background: 'none', border: 'none', fontSize: 12, color: 'var(--stone)', cursor: 'pointer', textAlign: 'left', padding: '2px 14px 10px', fontFamily: 'DM Sans, sans-serif' }}
                 >
-                  Switch household →
+                  {t('topbar.switch_household')}
                 </button>
               )}
 
@@ -203,9 +209,15 @@ export default function Topbar() {
             </>
           )}
 
+          <button
+            onClick={toggleLang}
+            style={{ width: '100%', padding: '8px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13.5, color: 'var(--stone)', fontFamily: 'DM Sans, sans-serif' }}
+          >
+            {t('lang.switch') === 'ES' ? '🌐 Español' : '🌐 English'}
+          </button>
           <button onClick={() => { setShowMenu(false); signOut(); }}
             style={{ width: '100%', padding: '8px 14px', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13.5, color: 'var(--charcoal)', fontFamily: 'DM Sans, sans-serif' }}>
-            Sign out
+            {t('topbar.sign_out')}
           </button>
         </div>
       )}
@@ -217,7 +229,7 @@ export default function Topbar() {
   if (pathname === '/') {
     mobileTrailing = (
       <>
-        <button className="round-btn" aria-label="Notifications">
+        <button className="round-btn" aria-label={t('topbar.notifications')}>
           <BellIcon />
           <span className="dot" aria-hidden="true" />
         </button>
@@ -227,7 +239,7 @@ export default function Topbar() {
   } else if (pathname === '/shopping') {
     mobileTrailing = (
       <>
-        <button className="round-btn" aria-label="Notifications">
+        <button className="round-btn" aria-label={t('topbar.notifications')}>
           <BellIcon />
           <span className="dot" aria-hidden="true" />
         </button>
@@ -237,7 +249,7 @@ export default function Topbar() {
   } else if (pathname === '/recipes') {
     mobileTrailing = (
       <>
-        <button className="round-btn" aria-label="Add recipe"
+        <button className="round-btn" aria-label={t('topbar.add_recipe_btn')}
           onClick={() => scrollToEl('#new-recipe-form')}>
           <PlusIcon />
         </button>
@@ -247,7 +259,7 @@ export default function Topbar() {
   } else if (pathname === '/pantry') {
     mobileTrailing = (
       <>
-        <button className="round-btn" aria-label="Add item"
+        <button className="round-btn" aria-label={t('topbar.add_item_btn')}
           onClick={() => scrollToEl('.pantry-add-form')}>
           <PlusIcon />
         </button>
@@ -273,10 +285,10 @@ export default function Topbar() {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        <input placeholder="Search recipes, ingredients…" aria-label="Search" />
+        <input placeholder={t('topbar.search_placeholder')} aria-label={t('topbar.search_placeholder')} />
       </div>
 
-      <button className="icon-btn topbar-desktop" aria-label="Notifications">
+      <button className="icon-btn topbar-desktop" aria-label={t('topbar.notifications')}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="19" height="19">
           <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
           <path d="M13.73 21a2 2 0 01-3.46 0"/>

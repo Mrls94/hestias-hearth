@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAppState } from '../context/AppState';
+import { useTranslation } from 'react-i18next';
 
 const GLYPHS = [
   // Stews, soups & bowls
@@ -40,19 +41,12 @@ const QUICK_CHIPS = [
 ];
 
 const DIFFICULTIES = [
-  { value: 'Mortal', emoji: '🥄', desc: 'Weeknight-simple. No quest required.' },
-  { value: 'Heroic', emoji: '⚔️',  desc: 'A worthy challenge for a demigod.' },
-  { value: 'Divine', emoji: '⚡',  desc: 'Ambrosia-tier. The gods are watching.' },
+  { value: 'Mortal', emoji: '🥄', descKey: 'diff_mortal_desc' },
+  { value: 'Heroic', emoji: '⚔️',  descKey: 'diff_heroic_desc' },
+  { value: 'Divine', emoji: '⚡',  descKey: 'diff_divine_desc' },
 ];
 
 const CATEGORIES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
-
-const TOASTS = {
-  Mortal: 'A humble, honest dish. Hestia approves of your restraint.',
-  Heroic: 'A feat worthy of song! The household shall feast well.',
-  Divine: 'The gods lean in from Olympus. Ambrosia, eat your heart out.',
-  error:  'Every legend needs a name — title your dish first!',
-};
 
 const DIFF_CLASS = { Mortal: 'rc-diff-mortal', Heroic: 'rc-diff-heroic', Divine: 'rc-diff-divine' };
 
@@ -123,6 +117,7 @@ const SaveIcon = () => (
 
 export default function RecipeCreator({ onClose, recipe = null }) {
   const { addRecipe, updateRecipe } = useAppState();
+  const { t } = useTranslation();
   const [form, setForm] = useState(() => initForm(recipe));
   const nameRef = useRef(null);
   const toastTimer = useRef(null);
@@ -182,7 +177,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
   // ── Save ────────────────────────────────────────
   function handleSave() {
     if (!name.trim()) {
-      showToast('📜', TOASTS.error);
+      showToast('📜', t('creator.toast_error'));
       nameRef.current?.focus();
       return;
     }
@@ -201,7 +196,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
     } else {
       addRecipe({ id: Date.now(), ...data });
     }
-    showToast('🔥', TOASTS[difficulty]);
+    showToast('🔥', t(`creator.toast_${difficulty.toLowerCase()}`));
     setTimeout(onClose, 1600);
   }
 
@@ -216,9 +211,9 @@ export default function RecipeCreator({ onClose, recipe = null }) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 16, height: 16 }}>
             <polyline points="15 18 9 12 15 6"/>
           </svg>
-          Back
+          {t('creator.back')}
         </button>
-        <span style={{ fontFamily: 'Lora,serif', fontWeight: 600, fontSize: 16, color: 'var(--charcoal)' }}>{recipe ? 'Edit Recipe' : 'New Recipe'}</span>
+        <span style={{ fontFamily: 'Lora,serif', fontWeight: 600, fontSize: 16, color: 'var(--charcoal)' }}>{recipe ? t('creator.edit_recipe') : t('creator.new_recipe')}</span>
       </div>
 
       <div className="rc-overlay-scroll">
@@ -226,9 +221,9 @@ export default function RecipeCreator({ onClose, recipe = null }) {
         {/* ── Hero ── */}
         <div className="rc-hero">
           <div className="rc-hero-left">
-            <div className="rc-hero-eyebrow">Hestia's Hearth · Recipe Creator</div>
-            <div className="rc-hero-title">{recipe ? <>Refine your <em>legend</em></> : <>Craft a new <em>legend</em></>}</div>
-            <div className="rc-hero-sub">{recipe ? 'Adjust the details below — the hearth remembers every change.' : 'Every great feast begins with a single step. Fill in the details below and let the hearth do the rest.'}</div>
+            <div className="rc-hero-eyebrow">{t('creator.eyebrow')}</div>
+            <div className="rc-hero-title">{recipe ? <>{t('creator.refine_title')} <em>{t('creator.refine_title_em')}</em></> : <>{t('creator.craft_title')} <em>{t('creator.craft_title_em')}</em></>}</div>
+            <div className="rc-hero-sub">{recipe ? t('creator.refine_sub') : t('creator.craft_sub')}</div>
           </div>
           <div className="rc-hero-glyph">{glyph}</div>
         </div>
@@ -242,19 +237,19 @@ export default function RecipeCreator({ onClose, recipe = null }) {
             <div className="rc-card">
               <div className="rc-card-head">
                 <div className="rc-card-num">1</div>
-                <div className="rc-card-title">Name your dish</div>
+                <div className="rc-card-title">{t('creator.card1_title')}</div>
               </div>
-              <label className="rc-label" htmlFor="rc-name">Recipe title</label>
+              <label className="rc-label" htmlFor="rc-name">{t('creator.recipe_title_label')}</label>
               <input
                 id="rc-name"
                 ref={nameRef}
                 className="rc-input rc-input-lg"
-                placeholder="e.g. Lemon Herb Roasted Chicken…"
+                placeholder={t('creator.recipe_title_ph')}
                 value={name}
                 onChange={e => patch({ name: e.target.value })}
               />
               <div style={{ marginTop: 18 }}>
-                <label className="rc-label">Choose a glyph</label>
+                <label className="rc-label">{t('creator.choose_glyph')}</label>
                 <div className="rc-glyph-row">
                   {GLYPHS.map(g => (
                     <button
@@ -275,11 +270,11 @@ export default function RecipeCreator({ onClose, recipe = null }) {
             <div className="rc-card">
               <div className="rc-card-head">
                 <div className="rc-card-num">2</div>
-                <div className="rc-card-title">Ingredients</div>
-                <span className="rc-card-hint">qty + name</span>
+                <div className="rc-card-title">{t('creator.card2_title')}</div>
+                <span className="rc-card-hint">{t('creator.card2_hint')}</span>
               </div>
 
-              <p className="rc-pantry-label">Quick-add pantry staples:</p>
+              <p className="rc-pantry-label">{t('creator.quick_add')}</p>
               <div className="rc-quick-chips" style={{ marginBottom: 20 }}>
                 {QUICK_CHIPS.map(chip => (
                   <button
@@ -294,8 +289,8 @@ export default function RecipeCreator({ onClose, recipe = null }) {
               </div>
 
               <div className="rc-ing-head">
-                <span className="rc-label" style={{ margin: 0 }}>Qty</span>
-                <span className="rc-label" style={{ margin: 0 }}>Ingredient</span>
+                <span className="rc-label" style={{ margin: 0 }}>{t('creator.qty')}</span>
+                <span className="rc-label" style={{ margin: 0 }}>{t('creator.ingredient')}</span>
                 <span />
               </div>
 
@@ -303,20 +298,20 @@ export default function RecipeCreator({ onClose, recipe = null }) {
                 <div key={i} className="rc-ing-row">
                   <input
                     className="rc-input"
-                    placeholder="2 tbsp"
+                    placeholder={t('creator.qty_ph')}
                     value={ing.qty}
                     onChange={e => setIngField(i, 'qty', e.target.value)}
                   />
                   <input
                     className="rc-input"
-                    placeholder="Olive oil"
+                    placeholder={t('creator.ingredient_ph')}
                     value={ing.name}
                     onChange={e => setIngField(i, 'name', e.target.value)}
                   />
                   <button
                     type="button"
                     className="rc-remove"
-                    aria-label="Remove ingredient"
+                    aria-label={t('creator.remove_ingredient')}
                     onClick={() => removeIng(i)}
                   >
                     <XIcon />
@@ -326,7 +321,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
 
               <button type="button" className="rc-add-btn" onClick={addIngRow}>
                 <PlusIcon />
-                Add ingredient
+                {t('creator.add_ingredient')}
               </button>
             </div>
 
@@ -334,8 +329,8 @@ export default function RecipeCreator({ onClose, recipe = null }) {
             <div className="rc-card">
               <div className="rc-card-head">
                 <div className="rc-card-num">3</div>
-                <div className="rc-card-title">Steps</div>
-                <span className="rc-card-hint">one step per box</span>
+                <div className="rc-card-title">{t('creator.card3_title')}</div>
+                <span className="rc-card-hint">{t('creator.card3_hint')}</span>
               </div>
 
               {steps.map((step, i) => (
@@ -343,19 +338,19 @@ export default function RecipeCreator({ onClose, recipe = null }) {
                   <div className="rc-step-num">{i + 1}</div>
                   <textarea
                     className="rc-textarea"
-                    placeholder={i === 0 ? 'e.g. Preheat oven to 200°C…' : 'Next step…'}
+                    placeholder={i === 0 ? t('creator.step_ph_first') : t('creator.step_ph_next')}
                     value={step}
                     rows={2}
                     onChange={e => setStep(i, e.target.value)}
                   />
                   <div className="rc-step-actions">
-                    <button type="button" className="rc-arrow" aria-label="Move step up" disabled={i === 0} onClick={() => moveStep(i, -1)}>
+                    <button type="button" className="rc-arrow" aria-label={t('creator.move_up')} disabled={i === 0} onClick={() => moveStep(i, -1)}>
                       <ChevronUpIcon />
                     </button>
-                    <button type="button" className="rc-arrow" aria-label="Move step down" disabled={i === steps.length - 1} onClick={() => moveStep(i, 1)}>
+                    <button type="button" className="rc-arrow" aria-label={t('creator.move_down')} disabled={i === steps.length - 1} onClick={() => moveStep(i, 1)}>
                       <ChevronDownIcon />
                     </button>
-                    <button type="button" className="rc-remove" aria-label="Remove step" onClick={() => removeStep(i)}>
+                    <button type="button" className="rc-remove" aria-label={t('creator.remove_step')} onClick={() => removeStep(i)}>
                       <XIcon />
                     </button>
                   </div>
@@ -364,7 +359,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
 
               <button type="button" className="rc-add-btn" onClick={addStep}>
                 <PlusIcon />
-                Add step
+                {t('creator.add_step')}
               </button>
             </div>
 
@@ -372,13 +367,13 @@ export default function RecipeCreator({ onClose, recipe = null }) {
             <div className="rc-card">
               <div className="rc-card-head">
                 <div className="rc-card-num">4</div>
-                <div className="rc-card-title">Fine print</div>
-                <span className="rc-card-hint">optional</span>
+                <div className="rc-card-title">{t('creator.card4_title')}</div>
+                <span className="rc-card-hint">{t('creator.card4_hint')}</span>
               </div>
 
               <div className="rc-num-grid">
                 <div>
-                  <label className="rc-label" htmlFor="rc-time">Prep + cook time</label>
+                  <label className="rc-label" htmlFor="rc-time">{t('creator.time_label')}</label>
                   <div className="rc-num-wrap">
                     <input
                       id="rc-time"
@@ -393,7 +388,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
                   </div>
                 </div>
                 <div>
-                  <label className="rc-label" htmlFor="rc-kcal">Calories (approx)</label>
+                  <label className="rc-label" htmlFor="rc-kcal">{t('creator.calories_label')}</label>
                   <div className="rc-num-wrap">
                     <input
                       id="rc-kcal"
@@ -410,7 +405,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
               </div>
 
               <div style={{ marginTop: 16 }}>
-                <label className="rc-label" htmlFor="rc-category">Category</label>
+                <label className="rc-label" htmlFor="rc-category">{t('creator.category_label')}</label>
                 <select
                   id="rc-category"
                   className="rc-input"
@@ -418,7 +413,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
                   onChange={e => patch({ category: e.target.value })}
                   style={{ cursor: 'pointer' }}
                 >
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {CATEGORIES.map(c => <option key={c} value={c}>{t(`creator.cat_${c}`, c)}</option>)}
                 </select>
               </div>
             </div>
@@ -433,7 +428,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
               <div className="rc-card" style={{ marginBottom: 16 }}>
                 <div className="rc-card-head">
                   <div className="rc-card-num">5</div>
-                  <div className="rc-card-title">Difficulty</div>
+                  <div className="rc-card-title">{t('creator.card5_title')}</div>
                 </div>
                 <div className="rc-diff-grid">
                   {DIFFICULTIES.map(d => (
@@ -446,7 +441,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
                       <span className="rc-diff-emoji">{d.emoji}</span>
                       <span>
                         <span className="rc-diff-name">{d.value}</span>
-                        <span className="rc-diff-desc">{d.desc}</span>
+                        <span className="rc-diff-desc">{t(`creator.${d.descKey}`)}</span>
                       </span>
                       <span className="rc-diff-check">
                         {difficulty === d.value && (
@@ -468,12 +463,12 @@ export default function RecipeCreator({ onClose, recipe = null }) {
                   <span className={`rc-preview-diff ${DIFF_CLASS[difficulty]}`}>{difficulty}</span>
                 </div>
                 <div className="rc-preview-body">
-                  <div className="rc-preview-eyebrow">Live preview</div>
-                  <div className="rc-preview-name">{name || 'Your recipe name…'}</div>
+                  <div className="rc-preview-eyebrow">{t('creator.live_preview')}</div>
+                  <div className="rc-preview-name">{name || t('creator.preview_empty_name')}</div>
                   <div className="rc-preview-meta">
                     {time     ? <span>⏱ {time} min</span>   : null}
                     {calories ? <span>🔥 {calories} kcal</span> : null}
-                    {!time && !calories && <span>Add time & calories above</span>}
+                    {!time && !calories && <span>{t('creator.preview_add_details')}</span>}
                   </div>
                   {previewIngs.length > 0 && (
                     <div className="rc-preview-ings">
@@ -492,7 +487,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
               <div className="rc-save-card">
                 <button type="button" className="btn-primary" onClick={handleSave}>
                   <SaveIcon />
-                  {recipe ? 'Save changes' : 'Save recipe'}
+                  {recipe ? t('creator.save_changes') : t('creator.save_recipe')}
                 </button>
                 <button
                   type="button"
@@ -500,10 +495,10 @@ export default function RecipeCreator({ onClose, recipe = null }) {
                   style={{ width: '100%', justifyContent: 'center', marginTop: 2 }}
                   onClick={onClose}
                 >
-                  Cancel
+                  {t('creator.cancel')}
                 </button>
                 <p className="rc-blessing">
-                  Hestia watches over every hearth — may your dish bring warmth and joy.
+                  {t('creator.blessing')}
                 </p>
               </div>
 
@@ -518,7 +513,7 @@ export default function RecipeCreator({ onClose, recipe = null }) {
       <div className="rc-overlay-savebar">
         <button type="button" className="btn-primary" onClick={handleSave}>
           <SaveIcon />
-          {recipe ? 'Save changes' : 'Save recipe'}
+          {recipe ? t('creator.save_changes') : t('creator.save_recipe')}
         </button>
       </div>
 

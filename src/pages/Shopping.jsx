@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAppState } from '../context/AppState';
+import { useTranslation } from 'react-i18next';
 
 const AISLES = [
   { key: 'proteins', emoji: '🥩', label: 'Proteins',     keywords: ['meat','chicken','fish','beef','pork','turkey','salmon','tuna','shrimp','tofu','egg','lentil','bean','lamb','prawn'] },
@@ -24,6 +25,7 @@ function groupByAisle(items) {
 
 export default function Shopping() {
   const { shoppingList, toggleShoppingChecked, generateShoppingFromPlanner, setShopping, moveCheckedToPantry, pantry } = useAppState();
+  const { t } = useTranslation();
   const [pantrySync, setPantrySync] = useState(true);
   const [confirmClear, setConfirmClear] = useState(false);
   const [movedMsg, setMovedMsg] = useState('');
@@ -41,7 +43,7 @@ export default function Shopping() {
   const handleMoveToPanel = () => {
     const n = moveCheckedToPantry();
     if (n) {
-      setMovedMsg(`${n} item${n !== 1 ? 's' : ''} moved to pantry`);
+      setMovedMsg(t('shopping.moved', { count: n }));
       setTimeout(() => setMovedMsg(''), 3000);
     }
   };
@@ -53,9 +55,9 @@ export default function Shopping() {
       <div>
         {total === 0 ? (
           <div className="card" style={{ padding: '32px 28px', color: 'var(--stone)' }}>
-            <p style={{ marginBottom: 16 }}>The Agora awaits. Generate a list from your meal plan or add items below.</p>
+            <p style={{ marginBottom: 16 }}>{t('shopping.empty_message')}</p>
             <button className="btn-primary" onClick={generateShoppingFromPlanner}>
-              Generate from planner
+              {t('shopping.generate')}
             </button>
           </div>
         ) : (
@@ -64,9 +66,9 @@ export default function Shopping() {
             return (
               <div key={aisle.key} className="aisle">
                 <div className="aisle-head">
-                  <div className="aisle-title">{aisle.emoji} {aisle.label}</div>
+                  <div className="aisle-title">{aisle.emoji} {t(`shopping.aisle_${aisle.key}`)}</div>
                   <div className="aisle-line" />
-                  <div className="aisle-count">{unchecked} to buy</div>
+                  <div className="aisle-count">{t('shopping.to_buy', { count: unchecked })}</div>
                 </div>
                 {aisle.items.map(item => {
                   const idx = shoppingList.findIndex(i => i.name === item.name);
@@ -107,14 +109,14 @@ export default function Shopping() {
       <div className="shop-panel">
         {/* Summary card */}
         <div className="shop-summary">
-          <div className="shop-summary-label">This week's list</div>
+          <div className="shop-summary-label">{t('shopping.this_weeks_list')}</div>
           <div className="shop-summary-count">
-            {total} item{total !== 1 ? 's' : ''} · {checked} checked off
+            {t('shopping.summary_count', { count: total, checked })}
           </div>
           <div className="shop-progress-track">
             <div className="shop-progress-fill" style={{ width: `${pct}%` }} />
           </div>
-          <div className="shop-summary-pct">{pct}% complete</div>
+          <div className="shop-summary-pct">{t('shopping.complete', { pct })}</div>
         </div>
 
         {/* Move to pantry */}
@@ -128,7 +130,7 @@ export default function Shopping() {
               <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
               <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
             </svg>
-            Move {checked} item{checked !== 1 ? 's' : ''} to pantry
+            {t('shopping.move_to_pantry', { count: checked })}
           </button>
         )}
         {movedMsg && (
@@ -140,9 +142,11 @@ export default function Shopping() {
         {/* Pantry sync toggle */}
         <div className="shop-toggle-card">
           <div>
-            <div style={{ fontWeight: 600, fontSize: 14 }}>Hide pantry items</div>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>{t('shopping.hide_pantry')}</div>
             <div style={{ fontSize: 12.5, color: 'var(--stone)', marginTop: 2 }}>
-              {pantrySync ? `Hiding ${shoppingList.length - visibleList.length} owned item${shoppingList.length - visibleList.length !== 1 ? 's' : ''}` : 'Showing all items'}
+              {pantrySync
+                ? t('shopping.hiding', { count: shoppingList.length - visibleList.length })
+                : t('shopping.showing_all')}
             </div>
           </div>
           <button
@@ -160,27 +164,27 @@ export default function Shopping() {
           style={{ width: '100%', justifyContent: 'center' }}
           onClick={generateShoppingFromPlanner}
         >
-          Regenerate from planner
+          {t('shopping.regenerate')}
         </button>
         {total > 0 && (
           confirmClear ? (
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', padding: '4px 0' }}>
-              <span style={{ fontSize: 13, color: 'var(--charcoal)' }}>Clear {total} item{total !== 1 ? 's' : ''}?</span>
+              <span style={{ fontSize: 13, color: 'var(--charcoal)' }}>{t('shopping.clear_confirm', { count: total })}</span>
               <button
                 style={{ fontSize: 13, fontWeight: 600, color: 'var(--terracotta-dark)', background: 'var(--terracotta-light)', border: 'none', cursor: 'pointer', padding: '5px 12px', borderRadius: 8 }}
                 onClick={() => { setShopping([]); setConfirmClear(false); }}
-              >Clear all</button>
+              >{t('shopping.clear_all')}</button>
               <button
                 style={{ fontSize: 13, color: 'var(--stone)', background: 'none', border: 'none', cursor: 'pointer' }}
                 onClick={() => setConfirmClear(false)}
-              >Cancel</button>
+              >{t('shopping.cancel')}</button>
             </div>
           ) : (
             <button
               style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: 'var(--stone)', marginTop: 4 }}
               onClick={() => setConfirmClear(true)}
             >
-              Clear list
+              {t('shopping.clear')}
             </button>
           )
         )}

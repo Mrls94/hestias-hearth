@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function parseSteps(steps) {
   if (!steps) return [];
@@ -12,7 +13,9 @@ export const DIFF_BADGE = {
   Divine: { bg: 'var(--terracotta-light)', color: 'var(--terracotta-dark)', border: '#d4917a' },
 };
 
-export default function RecipeDetail({ recipe: r, onBack, backLabel = 'All recipes', onDelete, onEdit }) {
+export default function RecipeDetail({ recipe: r, onBack, backLabel, onDelete, onEdit }) {
+  const { t } = useTranslation();
+  const resolvedBackLabel = backLabel ?? t('detail.all_recipes');
   const [checked,   setChecked]   = React.useState({});
   const [doneSteps, setDoneSteps] = React.useState({});
 
@@ -25,8 +28,8 @@ export default function RecipeDetail({ recipe: r, onBack, backLabel = 'All recip
 
   const footer = (onDelete || onEdit) && (
     <div className="rd-footer">
-      {onEdit   && <button className="rd-edit"   onClick={() => onEdit(r)}>Edit recipe</button>}
-      {onDelete && <button className="rd-delete" onClick={() => onDelete(r.id)}>Delete recipe</button>}
+      {onEdit   && <button className="rd-edit"   onClick={() => onEdit(r)}>{t('detail.edit_recipe')}</button>}
+      {onDelete && <button className="rd-delete" onClick={() => onDelete(r.id)}>{t('detail.delete_recipe')}</button>}
     </div>
   );
 
@@ -36,7 +39,7 @@ export default function RecipeDetail({ recipe: r, onBack, backLabel = 'All recip
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
           <polyline points="15 18 9 12 15 6"/>
         </svg>
-        {backLabel}
+        {resolvedBackLabel}
       </button>
 
       <div className="rd-header">
@@ -61,7 +64,7 @@ export default function RecipeDetail({ recipe: r, onBack, backLabel = 'All recip
               <span className="rd-stat-icon">⏱</span>
               <div>
                 <div className="rd-stat-val">{r.time} min</div>
-                <div className="rd-stat-lbl">Cook time</div>
+                <div className="rd-stat-lbl">{t('detail.cook_time')}</div>
               </div>
             </div>
           )}
@@ -70,7 +73,7 @@ export default function RecipeDetail({ recipe: r, onBack, backLabel = 'All recip
               <span className="rd-stat-icon">🔥</span>
               <div>
                 <div className="rd-stat-val">{r.kcal}</div>
-                <div className="rd-stat-lbl">kcal per serving</div>
+                <div className="rd-stat-lbl">{t('detail.kcal_per_serving')}</div>
               </div>
             </div>
           )}
@@ -79,7 +82,7 @@ export default function RecipeDetail({ recipe: r, onBack, backLabel = 'All recip
               <span className="rd-stat-icon">📊</span>
               <div>
                 <div className="rd-stat-val" style={{ color: diff?.color }}>{r.difficulty}</div>
-                <div className="rd-stat-lbl">Difficulty</div>
+                <div className="rd-stat-lbl">{t('detail.difficulty')}</div>
               </div>
             </div>
           )}
@@ -90,8 +93,8 @@ export default function RecipeDetail({ recipe: r, onBack, backLabel = 'All recip
         {ingredients.length > 0 && (
           <div className="rd-ing-panel">
             <div className="rd-panel-head">
-              <span className="rd-panel-title">Ingredients</span>
-              <span className="rd-panel-count">{ingredients.length} items</span>
+              <span className="rd-panel-title">{t('detail.ingredients')}</span>
+              <span className="rd-panel-count">{t('detail.items', { count: ingredients.length })}</span>
             </div>
             <div className="rd-ing-list">
               {ingredients.map((ing, i) => {
@@ -117,7 +120,7 @@ export default function RecipeDetail({ recipe: r, onBack, backLabel = 'All recip
 
         {steps.length > 0 && (
           <div className="rd-steps-col">
-            <h2 className="rd-steps-title">How to make it</h2>
+            <h2 className="rd-steps-title">{t('detail.how_to_make')}</h2>
             <div className="rd-steps">
               {steps.map((step, i) => (
                 <div key={i} className={`rd-step${doneSteps[i] ? ' done' : ''}`} onClick={() => toggleStep(i)}>

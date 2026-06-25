@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAppState } from '../context/AppState';
 import { useAuth } from '../context/AuthContext';
 import FlameIcon from './FlameIcon';
+import { useTranslation } from 'react-i18next';
 
 function getWeekDates() {
   const today = new Date();
@@ -73,6 +74,8 @@ export default function Sidebar() {
   const { mealPlanner, recipes, shoppingList, householdInfo, switchHousehold, renameHousehold } = useAppState();
   const { userName, userEmail, signOut } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const toggleLang = () => i18n.changeLanguage(i18n.language === 'es' ? 'en' : 'es');
   const planned = countPlannedMeals(mealPlanner);
   const shoppingCount = shoppingList.filter(i => !i.checked).length;
   const [copied, setCopied]         = React.useState(false);
@@ -116,7 +119,7 @@ export default function Sidebar() {
       setJoining(false);
       setJoinCode('');
     } catch (err) {
-      setJoinErr(err.status === 404 ? 'Code not found.' : 'Could not join.');
+      setJoinErr(err.status === 404 ? t('sidebar.code_not_found') : t('sidebar.could_not_join'));
     } finally {
       setJoinBusy(false);
     }
@@ -133,20 +136,20 @@ export default function Sidebar() {
       </div>
 
       <nav className="sidebar-nav">
-        <NavItem to="/"         icon={<IcoHome />}     label="Hearth"    end />
-        <NavItem to="/planner"  icon={<IcoCalendar />} label="Planner" />
-        <NavItem to="/recipes"  icon={<IcoBook />}     label="Recipes"   count={recipes.length || null} />
-        <NavItem to="/shopping" icon={<IcoCart />}     label="Shopping"  count={shoppingCount || null} />
-        <NavItem to="/pantry"   icon={<IcoBox />}      label="Pantry" />
+        <NavItem to="/"         icon={<IcoHome />}     label={t('nav.hearth')}    end />
+        <NavItem to="/planner"  icon={<IcoCalendar />} label={t('nav.planner')} />
+        <NavItem to="/recipes"  icon={<IcoBook />}     label={t('nav.recipes')}   count={recipes.length || null} />
+        <NavItem to="/shopping" icon={<IcoCart />}     label={t('nav.shopping')}  count={shoppingCount || null} />
+        <NavItem to="/pantry"   icon={<IcoBox />}      label={t('nav.pantry')} />
       </nav>
 
       <div className="sidebar-spacer" />
 
       <div className="sidebar-card">
-        <div className="sidebar-card-label">This week</div>
-        <div className="sidebar-card-title">{planned} of 21 meals planned</div>
+        <div className="sidebar-card-label">{t('sidebar.this_week')}</div>
+        <div className="sidebar-card-title">{t('sidebar.meals_planned', { planned })}</div>
         <button className="sidebar-card-btn" onClick={() => navigate('/planner')}>
-          Finish planning →
+          {t('sidebar.finish_planning')}
         </button>
       </div>
 
@@ -155,7 +158,7 @@ export default function Sidebar() {
         <div style={{ marginBottom: 4 }}>
           <div style={{ padding: '8px 10px', background: 'var(--cream)', borderRadius: joining ? '10px 10px 0 0' : 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 12, color: 'var(--stone)', fontWeight: 500, marginBottom: 1 }}>Household</div>
+              <div style={{ fontSize: 12, color: 'var(--stone)', fontWeight: 500, marginBottom: 1 }}>{t('sidebar.household')}</div>
               {editingName ? (
                 <form onSubmit={handleRename} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
                   <input
@@ -171,7 +174,7 @@ export default function Sidebar() {
               ) : (
                 <button
                   onClick={() => { setNameInput(householdInfo.name); setEditingName(true); }}
-                  title="Rename household"
+                  title={t('sidebar.rename_household')}
                   style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: 'var(--charcoal)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: '100%', textAlign: 'left', fontFamily: 'DM Sans, sans-serif' }}
                 >
                   {householdInfo.name}
@@ -181,10 +184,10 @@ export default function Sidebar() {
             {!editingName && (
               <button
                 onClick={copyInviteCode}
-                title={copied ? 'Copied!' : `Invite code: ${householdInfo.inviteCode}`}
+                title={copied ? '✓' : `${t('sidebar.invite')}: ${householdInfo.inviteCode}`}
                 style={{ background: copied ? 'var(--sage-light)' : 'var(--warm-white)', border: '1px solid var(--stone-light)', borderRadius: 7, padding: '5px 8px', cursor: 'pointer', fontSize: 11, fontWeight: 600, color: copied ? 'var(--sage-dark)' : 'var(--stone)', whiteSpace: 'nowrap', flexShrink: 0, transition: 'all .15s' }}
               >
-                {copied ? '✓ Copied' : 'Invite'}
+                {copied ? t('sidebar.copied') : t('sidebar.invite')}
               </button>
             )}
           </div>
@@ -198,7 +201,7 @@ export default function Sidebar() {
                 autoFocus
                 value={joinCode}
                 onChange={e => { setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')); setJoinErr(''); }}
-                placeholder="Invite code"
+                placeholder={t('sidebar.invite_code_placeholder')}
                 maxLength={8}
                 style={{ padding: '6px 9px', border: '1.5px solid var(--stone-light)', borderRadius: 7, fontSize: 12.5, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.08em', outline: 'none', background: 'var(--warm-white)', color: 'var(--charcoal)', textTransform: 'uppercase' }}
               />
@@ -209,14 +212,14 @@ export default function Sidebar() {
                   disabled={joinBusy || joinCode.length < 4}
                   style={{ flex: 1, padding: '5px 0', background: 'var(--terracotta)', color: '#fff', border: 'none', borderRadius: 7, fontSize: 12, fontWeight: 600, cursor: 'pointer', opacity: (joinBusy || joinCode.length < 4) ? 0.55 : 1 }}
                 >
-                  {joinBusy ? '…' : 'Join'}
+                  {joinBusy ? t('sidebar.joining') : t('sidebar.join')}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setJoining(false); setJoinCode(''); setJoinErr(''); }}
                   style={{ padding: '5px 8px', background: 'none', border: '1px solid var(--stone-light)', borderRadius: 7, fontSize: 12, color: 'var(--stone)', cursor: 'pointer' }}
                 >
-                  Cancel
+                  {t('sidebar.cancel')}
                 </button>
               </div>
             </form>
@@ -225,7 +228,7 @@ export default function Sidebar() {
               onClick={() => setJoining(true)}
               style={{ width: '100%', background: 'none', border: 'none', fontSize: 11.5, color: 'var(--stone)', cursor: 'pointer', textAlign: 'left', padding: '3px 10px 0', fontFamily: 'DM Sans, sans-serif' }}
             >
-              Join a different household →
+              {t('sidebar.switch_household')}
             </button>
           )}
         </div>
@@ -236,12 +239,18 @@ export default function Sidebar() {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="profile-name">{userName || userEmail}</div>
           <div className="profile-sub">
-            {householdInfo?.memberCount > 1 ? `${householdInfo.memberCount} members` : 'Just you'}
+            {householdInfo?.memberCount > 1 ? t('sidebar.members', { count: householdInfo.memberCount }) : t('sidebar.just_you')}
           </div>
         </div>
         <button
+          onClick={toggleLang}
+          style={{ background: 'none', border: '1px solid var(--stone-light)', borderRadius: 6, cursor: 'pointer', color: 'var(--stone)', padding: '3px 7px', fontSize: 11, fontWeight: 700, marginRight: 2 }}
+        >
+          {t('lang.switch')}
+        </button>
+        <button
           onClick={signOut}
-          title="Sign out"
+          title={t('sidebar.sign_out')}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--stone)', padding: '4px', display: 'flex', alignItems: 'center' }}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">

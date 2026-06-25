@@ -2,15 +2,20 @@ import { pool } from './lib/cognito';
 
 const API_URL = import.meta.env.VITE_API_URL.replace(/\/$/, '');
 
+let _tokenPromise = null;
 function getToken() {
-  return new Promise((resolve, reject) => {
-    const user = pool.getCurrentUser();
-    if (!user) return reject(new Error('Not authenticated'));
-    user.getSession((err, session) => {
-      if (err || !session?.isValid()) return reject(err ?? new Error('Session expired'));
-      resolve(session.getIdToken().getJwtToken());
+  if (!_tokenPromise) {
+    _tokenPromise = new Promise((resolve, reject) => {
+      const user = pool.getCurrentUser();
+      if (!user) { _tokenPromise = null; return reject(new Error('Not authenticated')); }
+      user.getSession((err, session) => {
+        _tokenPromise = null;
+        if (err || !session?.isValid()) return reject(err ?? new Error('Session expired'));
+        resolve(session.getIdToken().getJwtToken());
+      });
     });
-  });
+  }
+  return _tokenPromise;
 }
 
 async function req(method, path, body) {

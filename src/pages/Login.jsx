@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import FlameIcon from '../components/FlameIcon';
+import { useTranslation } from 'react-i18next';
 
 export default function Login() {
   const { authState, signIn, signUp, confirmSignUp, forgotPassword, confirmForgotPassword } = useAuth();
+  const { t } = useTranslation();
   const [mode, setMode] = useState('signin'); // signin | signup | forgot | reset
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +20,7 @@ export default function Login() {
     setError('');
     setBusy(true);
     try { await fn(); }
-    catch (e) { setError(e.message || 'Something went wrong'); }
+    catch (e) { setError(e.message || t('login.something_wrong')); }
     finally { setBusy(false); }
   }
 
@@ -33,13 +35,13 @@ export default function Login() {
       <div className="login-root">
         <div className="login-card">
           <div className="login-flame"><FlameIcon width={38} height={54} /></div>
-          <h1 className="login-title">Check your email</h1>
-          <p className="login-sub">We sent a verification code to your inbox.</p>
-          <p className="login-sub" style={{ fontSize: 12, color: 'var(--stone)' }}>Can't find it? Check your spam folder.</p>
+          <h1 className="login-title">{t('login.check_email_title')}</h1>
+          <p className="login-sub">{t('login.check_email_sub')}</p>
+          <p className="login-sub" style={{ fontSize: 12, color: 'var(--stone)' }}>{t('login.check_spam')}</p>
           <input
             className="login-input"
             type="text"
-            placeholder="Verification code"
+            placeholder={t('login.verification_code')}
             value={code}
             onChange={e => setCode(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handle(() => confirmSignUp(code))}
@@ -47,7 +49,7 @@ export default function Login() {
           />
           {error && <p className="login-error">{error}</p>}
           <button className="login-btn-primary" onClick={() => handle(() => confirmSignUp(code))} disabled={busy}>
-            {busy ? 'Confirming…' : 'Confirm email'}
+            {busy ? t('login.confirming') : t('login.confirm_email')}
           </button>
         </div>
       </div>
@@ -60,13 +62,13 @@ export default function Login() {
       <div className="login-root">
         <div className="login-card">
           <div className="login-flame"><FlameIcon width={38} height={54} /></div>
-          <h1 className="login-title">Reset password</h1>
-          <p className="login-sub">Enter the code we sent to {email} and choose a new password.</p>
-          <p className="login-sub" style={{ fontSize: 12, color: 'var(--stone)' }}>Can't find it? Check your spam folder.</p>
+          <h1 className="login-title">{t('login.reset_title')}</h1>
+          <p className="login-sub">{t('login.reset_sub', { email })}</p>
+          <p className="login-sub" style={{ fontSize: 12, color: 'var(--stone)' }}>{t('login.check_spam')}</p>
           <input
             className="login-input"
             type="text"
-            placeholder="Reset code"
+            placeholder={t('login.reset_code')}
             value={code}
             onChange={e => setCode(e.target.value)}
             autoFocus
@@ -74,7 +76,7 @@ export default function Login() {
           <input
             className="login-input"
             type="password"
-            placeholder="New password"
+            placeholder={t('login.new_password')}
             value={newPassword}
             onChange={e => setNewPassword(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handle(async () => {
@@ -95,10 +97,10 @@ export default function Login() {
               setNewPassword('');
             })}
           >
-            {busy ? 'Saving…' : 'Set new password'}
+            {busy ? t('login.saving') : t('login.set_new_password')}
           </button>
           <button className="login-btn-ghost" onClick={() => switchMode('signin')}>
-            Back to sign in
+            {t('login.back_to_sign_in')}
           </button>
         </div>
       </div>
@@ -111,12 +113,12 @@ export default function Login() {
       <div className="login-root">
         <div className="login-card">
           <div className="login-flame"><FlameIcon width={38} height={54} /></div>
-          <h1 className="login-title">Forgot password?</h1>
-          <p className="login-sub">Enter your email and we'll send a reset code.</p>
+          <h1 className="login-title">{t('login.forgot_title')}</h1>
+          <p className="login-sub">{t('login.forgot_sub')}</p>
           <input
             className="login-input"
             type="email"
-            placeholder="Email"
+            placeholder={t('login.email')}
             value={email}
             onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handle(async () => {
@@ -134,10 +136,10 @@ export default function Login() {
               switchMode('reset');
             })}
           >
-            {busy ? 'Sending…' : 'Send reset code'}
+            {busy ? t('login.sending') : t('login.send_reset_code')}
           </button>
           <button className="login-btn-ghost" onClick={() => switchMode('signin')}>
-            Back to sign in
+            {t('login.back_to_sign_in')}
           </button>
         </div>
       </div>
@@ -149,15 +151,15 @@ export default function Login() {
     <div className="login-root">
       <div className="login-card">
         <div className="login-flame">🔥</div>
-        <h1 className="login-title">Hestia's Hearth</h1>
-        <p className="login-sub">{mode === 'signin' ? 'Welcome back.' : 'Create your account.'}</p>
+        <h1 className="login-title">{t('login.title')}</h1>
+        <p className="login-sub">{mode === 'signin' ? t('login.welcome_back') : t('login.create_account_sub')}</p>
 
-        {signedUpMsg && <p className="login-success">Account created — sign in below.</p>}
+        {signedUpMsg && <p className="login-success">{t('login.account_created')}</p>}
 
         <input
           className="login-input"
           type="email"
-          placeholder="Email"
+          placeholder={t('login.email')}
           value={email}
           onChange={e => setEmail(e.target.value)}
           autoFocus
@@ -165,7 +167,7 @@ export default function Login() {
         <input
           className="login-input"
           type="password"
-          placeholder="Password"
+          placeholder={t('login.password')}
           value={password}
           onChange={e => setPassword(e.target.value)}
           onKeyDown={e => {
@@ -178,7 +180,7 @@ export default function Login() {
           <input
             className="login-input"
             type="text"
-            placeholder="Your name"
+            placeholder={t('login.your_name')}
             value={name}
             onChange={e => setName(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handle(() => signUp(email, password, name))}
@@ -196,13 +198,13 @@ export default function Login() {
           }}
         >
           {busy
-            ? (mode === 'signin' ? 'Signing in…' : 'Creating account…')
-            : (mode === 'signin' ? 'Sign in' : 'Create account')}
+            ? (mode === 'signin' ? t('login.signing_in') : t('login.creating_account'))
+            : (mode === 'signin' ? t('login.sign_in') : t('login.create_account'))}
         </button>
 
         {mode === 'signin' && (
           <button className="login-btn-ghost" onClick={() => switchMode('forgot')}>
-            Forgot password?
+            {t('login.forgot_password')}
           </button>
         )}
 
@@ -210,7 +212,7 @@ export default function Login() {
           className="login-btn-ghost"
           onClick={() => { switchMode(mode === 'signin' ? 'signup' : 'signin'); setSignedUpMsg(false); }}
         >
-          {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+          {mode === 'signin' ? t('login.no_account') : t('login.have_account')}
         </button>
       </div>
     </div>

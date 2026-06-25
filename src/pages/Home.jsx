@@ -3,23 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAppState, expiryStatus, expiryLabel } from '../context/AppState';
 import { useAuth } from '../context/AuthContext';
 import MeanderDivider from '../components/MeanderDivider';
+import { useTranslation } from 'react-i18next';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner'];
 const MEAL_PILL = { Breakfast: 'meal-pill-breakfast', Lunch: 'meal-pill-lunch', Dinner: 'meal-pill-dinner' };
-
-const QA = [
-  { icon: '📖', label: 'Add recipe',    desc: 'Save a new dish',    color: 'terra', to: '/recipes'  },
-  { icon: '📅', label: 'Plan meals',    desc: "Set the week's menu", color: 'sage',  to: '/planner'  },
-  { icon: '🛒', label: 'Shopping list', desc: 'Items to pick up',   color: 'ochre', to: '/shopping' },
-  { icon: '📦', label: 'Pantry',        desc: 'What you have',      color: 'stone', to: '/pantry'   },
-];
-
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -35,7 +22,7 @@ function weekPlanned(mealPlanner) {
     d.setDate(monday.getDate() + i);
     const key = d.toISOString().slice(0, 10);
     const day = mealPlanner[key] || {};
-    n += MEAL_TYPES.filter(t => day[t]).length;
+    n += MEAL_TYPES.filter(m => day[m]).length;
   }
   return n;
 }
@@ -43,6 +30,7 @@ function weekPlanned(mealPlanner) {
 export default function Home() {
   const { recipes, mealPlanner, pantry } = useAppState();
   const { userName } = useAuth();
+  const { t, i18n } = useTranslation();
   const expiring = pantry.filter(i => ['soon', 'exp'].includes(expiryStatus(i.expiry))).slice(0, 3);
   const navigate = useNavigate();
   const key = todayKey();
@@ -52,12 +40,27 @@ export default function Home() {
   const getRecipe = (id) => id ? recipes.find(r => r.id === id || r.id === Number(id)) : null;
 
   const todayKcal = MEAL_TYPES
-    .map(t => getRecipe(todayMeals[t])?.kcal || 0)
+    .map(m => getRecipe(todayMeals[m])?.kcal || 0)
     .reduce((a, b) => a + b, 0);
 
+  const locale = i18n.language === 'es' ? 'es-ES' : 'en-US';
   const dateLabel = new Date()
-    .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    .toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' })
     .toUpperCase();
+
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return t('home.good_morning');
+    if (h < 18) return t('home.good_afternoon');
+    return t('home.good_evening');
+  })();
+
+  const QA = [
+    { icon: '📖', label: t('home.qa_add_recipe'),  desc: t('home.qa_add_recipe_desc'),  color: 'terra', to: '/recipes'  },
+    { icon: '📅', label: t('home.qa_plan_meals'),   desc: t('home.qa_plan_meals_desc'),  color: 'sage',  to: '/planner'  },
+    { icon: '🛒', label: t('home.qa_shopping'),     desc: t('home.qa_shopping_desc'),    color: 'ochre', to: '/shopping' },
+    { icon: '📦', label: t('home.qa_pantry'),       desc: t('home.qa_pantry_desc'),      color: 'stone', to: '/pantry'   },
+  ];
 
   const hasLibrary = recipes.length > 0 || expiring.length > 0;
 
@@ -66,22 +69,22 @@ export default function Home() {
       {/* ── Zone 1: Hero ── */}
       <div className="home-hero">
         <div className="hero-left">
-          <div className="hero-greeting">{dateLabel} · {getGreeting()}</div>
-          <h1 className="hero-title">Welcome back, <em>{userName || 'friend'}</em>!</h1>
-          <p className="hero-sub">Simple recipe manager — add recipes, generate shopping lists, and plan meals.</p>
+          <div className="hero-greeting">{dateLabel} · {greeting}</div>
+          <h1 className="hero-title">{t('home.welcome_prefix')} <em>{userName || t('home.friend')}</em>!</h1>
+          <p className="hero-sub">{t('home.hero_sub')}</p>
         </div>
         <div className="hero-stats">
           <div className="hero-stat">
             <div className="hero-stat-num">{recipes.length}</div>
-            <div className="hero-stat-label">Recipes</div>
+            <div className="hero-stat-label">{t('home.stat_recipes')}</div>
           </div>
           <div className="hero-stat">
             <div className="hero-stat-num">{planned}</div>
-            <div className="hero-stat-label">Planned</div>
+            <div className="hero-stat-label">{t('home.stat_planned')}</div>
           </div>
           <div className="hero-stat">
             <div className="hero-stat-num">{todayKcal > 0 ? todayKcal.toLocaleString() : '—'}</div>
-            <div className="hero-stat-label">kcal today</div>
+            <div className="hero-stat-label">{t('home.stat_kcal')}</div>
           </div>
         </div>
       </div>
@@ -92,8 +95,8 @@ export default function Home() {
       <div className="home-grid">
         <div>
           <div className="section-head">
-            <span className="section-title">Today's meals</span>
-            <button className="section-link" onClick={() => navigate('/planner')}>View planner →</button>
+            <span className="section-title">{t('home.todays_meals')}</span>
+            <button className="section-link" onClick={() => navigate('/planner')}>{t('home.view_planner')}</button>
           </div>
           <div className="card">
             {MEAL_TYPES.map((type, i) => {
@@ -106,12 +109,12 @@ export default function Home() {
                   style={i === MEAL_TYPES.length - 1 ? { borderBottom: 'none' } : {}}
                 >
                   <div className="meal-thumb">{recipe?.emoji || '🍽️'}</div>
-                  <span className={`meal-pill ${MEAL_PILL[type]}`}>{type}</span>
+                  <span className={`meal-pill ${MEAL_PILL[type]}`}>{t(`planner.meal_${type}`)}</span>
                   <div className="meal-info">
                     <div className="meal-name">
                       {recipe
                         ? recipe.title
-                        : <span style={{ color: 'var(--stone)', fontWeight: 400 }}>Not planned</span>}
+                        : <span style={{ color: 'var(--stone)', fontWeight: 400 }}>{t('home.not_planned')}</span>}
                     </div>
                     {recipe && (
                       <div className="meal-sub">
@@ -127,7 +130,7 @@ export default function Home() {
 
         <div>
           <div className="section-head">
-            <span className="section-title">Quick actions</span>
+            <span className="section-title">{t('home.quick_actions')}</span>
           </div>
           <div className="qa-grid">
             {QA.map(({ icon, label, desc, color, to }) => (
@@ -151,8 +154,8 @@ export default function Home() {
             {recipes.length > 0 && (
               <>
                 <div className="section-head">
-                  <span className="section-title">Saved recipes</span>
-                  <button className="section-link" onClick={() => navigate('/recipes')}>View all →</button>
+                  <span className="section-title">{t('home.saved_recipes')}</span>
+                  <button className="section-link" onClick={() => navigate('/recipes')}>{t('home.view_all')}</button>
                 </div>
                 <div className="recipe-rail">
                   {recipes.slice(0, 8).map(r => (
@@ -177,8 +180,8 @@ export default function Home() {
             {expiring.length > 0 && (
               <>
                 <div className="section-head">
-                  <span className="section-title">Use it soon</span>
-                  <button className="section-link" onClick={() => navigate('/pantry')}>Pantry →</button>
+                  <span className="section-title">{t('home.use_it_soon')}</span>
+                  <button className="section-link" onClick={() => navigate('/pantry')}>{t('home.pantry_link')}</button>
                 </div>
                 <div className="card">
                   {expiring.map((item, i) => (

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../context/AppState';
 import RecipeDetail from '../components/RecipeDetail';
+import { useTranslation } from 'react-i18next';
 
 const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 const MEAL_ICONS = { Breakfast: '🌅', Lunch: '☀️', Dinner: '🌙', Snacks: '🍎' };
@@ -26,15 +27,17 @@ function isToday(d) {
   return toKey(d) === toKey(new Date());
 }
 
-function weekLabel(dates) {
-  const s = dates[0].toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-  const e = dates[6].toLocaleDateString('en-US', { day: 'numeric' });
-  return `Week of ${s} – ${e}, ${dates[6].getFullYear()}`;
+function weekLabel(dates, locale, t) {
+  const s = dates[0].toLocaleDateString(locale, { month: 'long', day: 'numeric' });
+  const e = dates[6].toLocaleDateString(locale, { day: 'numeric' });
+  return t('planner.week_of', { start: s, end: e, year: dates[6].getFullYear() });
 }
 
 export default function Planner() {
   const { mealPlanner, assignMeal, clearMeal, recipes, generateShoppingFromPlanner } = useAppState();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'es' ? 'es-ES' : 'en-US';
   const [offset, setOffset]       = useState(0);
   const [assigning, setAssigning] = useState(null); // { key, meal }
   const [activeDay, setActiveDay] = useState(() => (new Date().getDay() + 6) % 7);
@@ -66,7 +69,7 @@ export default function Planner() {
 
   if (viewingRecipe) {
     const live = recipes.find(r => r.id === viewingRecipe.id) ?? viewingRecipe;
-    return <RecipeDetail recipe={live} onBack={() => setViewingRecipe(null)} backLabel="Back to Planner" />;
+    return <RecipeDetail recipe={live} onBack={() => setViewingRecipe(null)} backLabel={t('planner.back_to_planner')} />;
   }
 
   return (
@@ -78,17 +81,17 @@ export default function Planner() {
             <button className="week-btn" onClick={() => setOffset(o => o - 1)}>‹</button>
             <button className="week-btn" onClick={() => setOffset(o => o + 1)}>›</button>
           </div>
-          <span className="week-range-title">{weekLabel(dates)}</span>
+          <span className="week-range-title">{weekLabel(dates, locale, t)}</span>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           {offset !== 0 && (
-            <button className="btn-ghost" onClick={() => setOffset(0)}>This week</button>
+            <button className="btn-ghost" onClick={() => setOffset(0)}>{t('planner.this_week')}</button>
           )}
           <button
             className="btn-primary"
             onClick={() => { generateShoppingFromPlanner(); navigate('/shopping'); }}
           >
-            Generate list
+            {t('planner.generate_list')}
           </button>
         </div>
       </div>
@@ -109,7 +112,7 @@ export default function Planner() {
             <React.Fragment key={meal}>
               <div className="pg-rowlabel">
                 <span className="ic">{MEAL_ICONS[meal]}</span>
-                <span className="tx">{meal}</span>
+                <span className="tx">{t(`planner.meal_${meal}`)}</span>
               </div>
               {dates.map((d, i) => {
                 const key      = toKey(d);
@@ -143,7 +146,7 @@ export default function Planner() {
                         onChange={e => handleSelect(key, meal, e.target.value)}
                         onBlur={() => setAssigning(null)}
                       >
-                        <option value="">— pick a recipe —</option>
+                        <option value="">{ t('planner.pick_recipe') }</option>
                         {recipes.map(r => (
                           <option key={r.id} value={r.id}>{r.title}</option>
                         ))}
@@ -155,7 +158,7 @@ export default function Planner() {
                           if (recipes.length === 0) { navigate('/recipes'); return; }
                           setAssigning({ key, meal });
                         }}
-                        aria-label={`Add ${meal} on ${d.toLocaleDateString()}`}
+                        aria-label={t('planner.add_meal_label', { meal: t(`planner.meal_${meal}`), date: d.toLocaleDateString(locale) })}
                       >+</button>
                     )}
                   </div>
@@ -166,7 +169,7 @@ export default function Planner() {
         </div>
 
         <div className="planner-foot">
-          <div className="pf-label">Daily kcal</div>
+          <div className="pf-label">{t('planner.daily_kcal')}</div>
           {dates.map((d, i) => {
             const key  = toKey(d);
             const kcal = dailyKcal(key);
@@ -199,7 +202,7 @@ export default function Planner() {
 
         {/* Daily total banner */}
         <div className="day-total-banner">
-          <span className="dt-label">Daily total</span>
+          <span className="dt-label">{t('planner.daily_total')}</span>
           <span className="dt-num">{activeDayKcal > 0 ? `${activeDayKcal.toLocaleString()} kcal` : '—'}</span>
         </div>
 
@@ -211,7 +214,7 @@ export default function Planner() {
             <div key={mealType} className="plan-block">
               <div className="plan-block-head">
                 <span className="pb-icon">{MEAL_ICONS[mealType]}</span>
-                <span className="pb-label">{mealType}</span>
+                <span className="pb-label">{t(`planner.meal_${mealType}`)}</span>
               </div>
               {recipe ? (
                 <div className="plan-meal-card">
@@ -232,7 +235,7 @@ export default function Planner() {
                   onChange={e => handleSelect(activeDateKey, mealType, e.target.value)}
                   onBlur={() => setAssigning(null)}
                 >
-                  <option value="">— pick a recipe —</option>
+                  <option value="">{t('planner.pick_recipe')}</option>
                   {recipes.map(r => <option key={r.id} value={r.id}>{r.emoji} {r.title}</option>)}
                 </select>
               ) : (
@@ -243,7 +246,7 @@ export default function Planner() {
                     setAssigning({ key: activeDateKey, meal: mealType });
                   }}
                 >
-                  + Add {mealType.toLowerCase()}
+                  {t('planner.add_meal_mobile', { meal: t(`planner.meal_${mealType}`).toLowerCase() })}
                 </button>
               )}
             </div>

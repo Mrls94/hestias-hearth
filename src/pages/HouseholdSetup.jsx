@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { createHousehold, joinHousehold } from '../api';
+import { useTranslation } from 'react-i18next';
 
 export default function HouseholdSetup({ onComplete }) {
+  const { t } = useTranslation();
   const [tab, setTab]       = useState('create'); // 'create' | 'join'
   const [name, setName]     = useState('');
   const [code, setCode]     = useState('');
@@ -17,7 +19,7 @@ export default function HouseholdSetup({ onComplete }) {
       const info = await createHousehold(name.trim());
       onComplete(info);
     } catch (err) {
-      setError('Could not create household. Please try again.');
+      setError(t('household.error_create'));
     } finally {
       setLoading(false);
     }
@@ -32,7 +34,7 @@ export default function HouseholdSetup({ onComplete }) {
       const info = await joinHousehold(code.trim());
       onComplete(info);
     } catch (err) {
-      setError(err.status === 404 ? 'Invite code not found. Check it and try again.' : 'Could not join. Please try again.');
+      setError(err.status === 404 ? t('household.error_not_found') : t('household.error_join'));
     } finally {
       setLoading(false);
     }
@@ -42,15 +44,15 @@ export default function HouseholdSetup({ onComplete }) {
     <div className="login-root">
       <div className="login-card">
         <div className="login-flame">🏠</div>
-        <h1 className="login-title">Your household</h1>
-        <p className="login-sub">Share recipes, pantry, and shopping with the people you cook for.</p>
+        <h1 className="login-title">{t('household.title')}</h1>
+        <p className="login-sub">{t('household.sub')}</p>
 
         {/* Tab switcher */}
         <div style={{ display: 'flex', background: 'var(--cream)', borderRadius: 10, padding: 3, gap: 3 }}>
-          {['create', 'join'].map(t => (
+          {['create', 'join'].map(tabKey => (
             <button
-              key={t}
-              onClick={() => { setTab(t); setError(''); }}
+              key={tabKey}
+              onClick={() => { setTab(tabKey); setError(''); }}
               style={{
                 flex: 1,
                 padding: '8px 0',
@@ -60,13 +62,13 @@ export default function HouseholdSetup({ onComplete }) {
                 fontSize: 13.5,
                 fontWeight: 600,
                 fontFamily: 'DM Sans, sans-serif',
-                background: tab === t ? 'var(--warm-white)' : 'transparent',
-                color: tab === t ? 'var(--terracotta-dark)' : 'var(--stone)',
-                boxShadow: tab === t ? '0 1px 4px rgba(0,0,0,.08)' : 'none',
+                background: tab === tabKey ? 'var(--warm-white)' : 'transparent',
+                color: tab === tabKey ? 'var(--terracotta-dark)' : 'var(--stone)',
+                boxShadow: tab === tabKey ? '0 1px 4px rgba(0,0,0,.08)' : 'none',
                 transition: 'all .15s',
               }}
             >
-              {t === 'create' ? 'Create new' : 'Join existing'}
+              {tabKey === 'create' ? t('household.create_new') : t('household.join_existing')}
             </button>
           ))}
         </div>
@@ -76,14 +78,14 @@ export default function HouseholdSetup({ onComplete }) {
             <input
               className="login-input"
               type="text"
-              placeholder="e.g. Sebastian & Lau's Kitchen"
+              placeholder={t('household.name_placeholder')}
               value={name}
               onChange={e => setName(e.target.value)}
               maxLength={60}
               autoFocus
             />
             <button className="login-btn-primary" type="submit" disabled={loading || !name.trim()}>
-              {loading ? 'Creating…' : 'Create household'}
+              {loading ? t('household.creating') : t('household.create')}
             </button>
           </form>
         ) : (
@@ -91,7 +93,7 @@ export default function HouseholdSetup({ onComplete }) {
             <input
               className="login-input"
               type="text"
-              placeholder="8-character invite code"
+              placeholder={t('household.code_placeholder')}
               value={code}
               onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
               maxLength={8}
@@ -99,7 +101,7 @@ export default function HouseholdSetup({ onComplete }) {
               style={{ letterSpacing: '0.12em', textTransform: 'uppercase' }}
             />
             <button className="login-btn-primary" type="submit" disabled={loading || code.length < 4}>
-              {loading ? 'Joining…' : 'Join household'}
+              {loading ? t('household.joining') : t('household.join')}
             </button>
           </form>
         )}

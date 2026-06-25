@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import RecipeCreator from '../components/RecipeCreator';
 import RecipeDetail from '../components/RecipeDetail';
 import { useAppState } from '../context/AppState';
+import { useTranslation } from 'react-i18next';
 
-const CHIPS = [
-  { label: 'All',               value: null },
-  { label: 'Breakfast',         value: 'Breakfast' },
-  { label: 'Lunch',             value: 'Lunch' },
-  { label: 'Dinner',            value: 'Dinner' },
-  { label: 'Vegetarian',        value: 'Vegetarian' },
-  { label: 'Quick · under 30',  value: 'Quick' },
-  { label: 'High protein',      value: 'HighProtein' },
+const CHIP_DEFS = [
+  { key: 'filter_all',          value: null },
+  { key: 'filter_breakfast',    value: 'Breakfast' },
+  { key: 'filter_lunch',        value: 'Lunch' },
+  { key: 'filter_dinner',       value: 'Dinner' },
+  { key: 'filter_vegetarian',   value: 'Vegetarian' },
+  { key: 'filter_quick',        value: 'Quick' },
+  { key: 'filter_high_protein', value: 'HighProtein' },
 ];
 
 const SAMPLES = [
@@ -22,6 +23,7 @@ const SAMPLES = [
 
 export default function Recipes() {
   const { recipes, addRecipe, deleteRecipe, updateRecipe } = useAppState();
+  const { t } = useTranslation();
   const [activeChip, setActiveChip] = useState(null);
   const [showCreator, setShowCreator] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
@@ -72,13 +74,13 @@ export default function Recipes() {
       {/* ── Toolbar ── */}
       <div className="recipes-toolbar">
         <div className="chips">
-          {CHIPS.map(c => (
+          {CHIP_DEFS.map(c => (
             <button
-              key={c.label}
+              key={c.key}
               className={`chip${activeChip === c.value ? ' active' : ''}`}
               onClick={() => setActiveChip(c.value)}
             >
-              {c.label}
+              {t(`recipes.${c.key}`)}
             </button>
           ))}
         </div>
@@ -86,10 +88,10 @@ export default function Recipes() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          Add recipe
+          {t('recipes.add_recipe')}
         </button>
         {recipes.length === 0 && (
-          <button className="btn-ghost" onClick={importSamples}>Add samples</button>
+          <button className="btn-ghost" onClick={importSamples}>{t('recipes.add_samples')}</button>
         )}
       </div>
 
@@ -97,8 +99,8 @@ export default function Recipes() {
       {filtered.length === 0 ? (
         <div style={{ color: 'var(--stone)', padding: '48px 0', textAlign: 'center' }}>
           {activeChip
-            ? `The scrolls hold no ${activeChip} recipes. Try a different filter or add one below.`
-            : 'The scrolls are blank. Add your first recipe or import samples to begin.'}
+            ? t('recipes.empty_filtered', { chip: activeChip })
+            : t('recipes.empty_all')}
         </div>
       ) : (
         <div className="recipe-grid">
@@ -109,7 +111,7 @@ export default function Recipes() {
                 <span style={{ fontSize: 52 }}>{r.emoji || '🍽️'}</span>
                 <button
                   className="rg-fav"
-                  aria-label={r.favorite ? 'Remove favourite' : 'Add to favourites'}
+                  aria-label={r.favorite ? t('recipes.fav_remove') : t('recipes.fav_add')}
                   onClick={e => { e.stopPropagation(); updateRecipe(r.id, { favorite: !r.favorite }); }}
                 >
                   {r.favorite ? '♥' : '♡'}
@@ -124,22 +126,22 @@ export default function Recipes() {
                 </div>
                 {pendingDelete === r.id ? (
                   <div style={{ marginTop: 10, display: 'flex', gap: 6, alignItems: 'center' }} onClick={e => e.stopPropagation()}>
-                    <span style={{ fontSize: 12, color: 'var(--charcoal)', fontWeight: 500 }}>Delete recipe?</span>
+                    <span style={{ fontSize: 12, color: 'var(--charcoal)', fontWeight: 500 }}>{t('recipes.delete_confirm')}</span>
                     <button
                       style={{ fontSize: 12, fontWeight: 600, color: 'var(--terracotta-dark)', background: 'var(--terracotta-light)', border: 'none', cursor: 'pointer', padding: '3px 10px', borderRadius: 7 }}
                       onClick={() => { deleteRecipe(r.id); setPendingDelete(null); }}
-                    >Delete</button>
+                    >{t('recipes.delete')}</button>
                     <button
                       style={{ fontSize: 12, color: 'var(--stone)', background: 'none', border: 'none', cursor: 'pointer' }}
                       onClick={() => setPendingDelete(null)}
-                    >Cancel</button>
+                    >{t('recipes.cancel')}</button>
                   </div>
                 ) : (
                   <button
                     style={{ marginTop: 10, fontSize: 12, color: 'var(--stone)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                     onClick={e => { e.stopPropagation(); setPendingDelete(r.id); }}
                   >
-                    Delete
+                    {t('recipes.delete')}
                   </button>
                 )}
               </div>
